@@ -115,7 +115,7 @@ export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
         <h1 className="mt-2 font-display text-4xl font-bold tracking-wide">相性表メーカー</h1>
         <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
           相性 × デッキパワーで環境を読むための自分専用マトリクス。データはこの端末のブラウザに自動保存されます。
-          ブラウザのキャッシュやCookieを削除するとデータも消えるため、大事なデータは相性表画面の「データ保存」でファイルに保存してください。
+          ブラウザの「Cookieと他のサイトデータ」を削除するとデータも消えるため（キャッシュのみの削除では消えません）、大事なデータは相性表画面の「データ保存」でファイルに保存してください。
         </p>
         <div className="mt-6 flex items-center gap-2.5">
           <button
