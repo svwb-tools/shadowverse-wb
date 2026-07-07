@@ -34,7 +34,10 @@ function CreateDialog({
           autoFocus
           value={name}
           onChange={(e) => setName(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && submit()}
+          onKeyDown={(e) => {
+            // IMEの変換確定のEnterでは作成しない
+            if (e.key === 'Enter' && !e.nativeEvent.isComposing) submit()
+          }}
           placeholder="例: 7月環境ランクマ"
           className="mt-1 w-full rounded-md border border-line bg-abyss px-3 py-2 text-sm placeholder:text-muted/60 focus:border-gold focus:outline-none"
         />

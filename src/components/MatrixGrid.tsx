@@ -66,7 +66,7 @@ function CellEditor({
       onFocus={(e) => e.target.select()}
       onBlur={(e) => commit(e.target.value)}
       onKeyDown={(e) => {
-        if (e.key === 'Enter') e.currentTarget.blur()
+        if (e.key === 'Enter' && !e.nativeEvent.isComposing) e.currentTarget.blur()
         if (e.key === 'Escape') onDone()
       }}
       className="h-9 w-full border border-gold bg-panel-2 text-center font-display text-[15px] font-semibold focus:outline-none"
