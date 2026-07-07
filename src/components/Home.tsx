@@ -103,7 +103,7 @@ export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
     <div className="mx-auto max-w-5xl px-5 pb-16">
       <header className="pb-10 pt-14">
         <div className="flex items-start justify-between gap-3">
-          <p className="flex items-center gap-2 font-display text-[11px] font-semibold tracking-[0.35em] text-gold">
+          <p className="flex items-center gap-2 font-display text-sm font-bold tracking-[0.35em] text-fg">
             <span className="inline-block h-2 w-2 rotate-45 bg-gold" />
             SHADOWVERSE: WORLDS BEYOND
           </p>
@@ -111,7 +111,8 @@ export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
         </div>
         <h1 className="mt-2 font-display text-4xl font-bold tracking-wide">相性表メーカー</h1>
         <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
-          相性 × デッキパワーで環境を読むための自分専用マトリクス。データはこの端末のブラウザ（localStorage）に自動保存されます。
+          相性 × デッキパワーで環境を読むための自分専用マトリクス。データはこの端末のブラウザに自動保存されます。
+          ブラウザのキャッシュやCookieを削除するとデータも消えるため、大事なデータは相性表画面の「データ保存」でファイルに保存しておいてください。
         </p>
         <div className="mt-6 flex items-center gap-2.5">
           <button
