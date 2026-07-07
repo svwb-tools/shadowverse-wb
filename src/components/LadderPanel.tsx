@@ -109,7 +109,7 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
               return (
                 <li
                   key={row.deckId}
-                  className="flex items-center gap-3 rounded-lg border border-line bg-panel-2/40 px-3 py-2"
+                  className="flex items-center gap-3 rounded-lg border border-line bg-panel-2 px-3 py-2"
                 >
                   <span
                     className={`w-7 text-center font-display text-lg font-bold ${

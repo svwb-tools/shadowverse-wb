@@ -40,7 +40,7 @@ function CreateDialog({
           onChange={(e) => setName(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && submit()}
           placeholder="例: 7月環境ランクマ"
-          className="mt-1 w-full rounded-md border border-line bg-abyss/60 px-3 py-2 text-sm placeholder:text-muted/60 focus:border-gold focus:outline-none"
+          className="mt-1 w-full rounded-md border border-line bg-abyss px-3 py-2 text-sm placeholder:text-muted/60 focus:border-gold focus:outline-none"
         />
 
         <label className="mt-4 block text-xs text-muted">主な用途（最初に開く集計タブ。後から切替可能）</label>
@@ -57,7 +57,7 @@ function CreateDialog({
               className={`rounded-lg border px-3 py-2 text-left transition ${
                 tab === m.key
                   ? 'border-gold bg-gold/10'
-                  : 'border-line bg-panel-2/40 hover:border-muted/60'
+                  : 'border-line bg-panel-2 hover:border-muted/60'
               }`}
             >
               <span className={`font-display text-sm font-semibold ${tab === m.key ? 'text-gold-bright' : ''}`}>
@@ -197,7 +197,7 @@ export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
       </header>
 
       {sorted.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-line bg-panel/50 px-6 py-16 text-center text-sm text-muted">
+        <div className="rounded-xl border border-dashed border-line bg-panel px-6 py-16 text-center text-sm text-muted">
           まだ相性表がありません。「新規相性表」から最初の相性表を作りましょう。
         </div>
       ) : (

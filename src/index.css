@@ -27,7 +27,6 @@
   --page-glow:
     radial-gradient(1100px 550px at 88% -10%, rgba(143, 107, 22, 0.04), transparent 60%),
     radial-gradient(900px 500px at -10% 110%, rgba(70, 110, 190, 0.04), transparent 60%);
-  --page-grid-line: rgba(60, 66, 80, 0.05);
 }
 
 :root[data-theme='dark'] {
@@ -52,7 +51,6 @@
   --page-glow:
     radial-gradient(1100px 550px at 88% -10%, rgba(216, 168, 78, 0.09), transparent 60%),
     radial-gradient(900px 500px at -10% 110%, rgba(78, 128, 216, 0.07), transparent 60%);
-  --page-grid-line: rgba(142, 151, 173, 0.05);
 }
 
 @theme inline {
@@ -78,19 +76,6 @@ body {
   min-height: 100vh;
   background-image: var(--page-glow);
   background-attachment: fixed;
-}
-
-/* うっすらとした方眼で「分析ボード」の空気を出す */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    linear-gradient(var(--page-grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--page-grid-line) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: radial-gradient(ellipse at 50% 0%, black, transparent 75%);
 }
 
 input[type="checkbox"],

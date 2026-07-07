@@ -39,7 +39,7 @@ export function ScatterView({ points }: { points: ScatterPoint[] }) {
   const gridLine = { stroke: 'var(--chart-grid)' } as const
 
   return (
-    <div className="rounded-lg border border-line bg-panel-2/30 p-3">
+    <div className="rounded-lg border border-line bg-panel-2 p-3">
       <h3 className="mb-1 px-1 text-sm font-semibold">2軸ビュー（対環境期待勝率 × デッキパワー）</h3>
       <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-[11px] text-muted">
         <span>右下に落ちるデッキは「相性は良いがパワー不足」の相性番長候補です。</span>
@@ -151,7 +151,7 @@ export function ScatterView({ points }: { points: ScatterPoint[] }) {
 
         {hover && (
           <div
-            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-md border border-line bg-abyss/95 px-2.5 py-1.5 text-xs shadow-lg"
+            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-md border border-line bg-abyss px-2.5 py-1.5 text-xs shadow-lg"
             style={{
               left: `${(sx(hover.expected) / W) * 100}%`,
               top: `${((sy(hover.deck.power) - 12) / H) * 100}%`,

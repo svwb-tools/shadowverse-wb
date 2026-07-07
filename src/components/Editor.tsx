@@ -81,7 +81,7 @@ export function Editor({ tableId, onBack }: { tableId: string; onBack: () => voi
 
   return (
     <div className="pb-16">
-      <header className="sticky top-0 z-40 border-b border-line bg-abyss/85 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-line bg-abyss">
         <div className="mx-auto flex max-w-350 flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5">
           <button
             onClick={onBack}

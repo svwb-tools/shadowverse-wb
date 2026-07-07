@@ -52,7 +52,7 @@ export function TournamentPanel({ table }: { table: MatchupTable }) {
               className={`rounded-lg border px-3 py-2.5 text-left transition ${
                 selected
                   ? 'border-gold bg-gold/10'
-                  : 'border-line bg-panel-2/40 hover:border-muted/60'
+                  : 'border-line bg-panel-2 hover:border-muted/60'
               }`}
             >
               <div className={`font-display text-base font-semibold ${selected ? 'text-gold-bright' : ''}`}>
@@ -67,7 +67,7 @@ export function TournamentPanel({ table }: { table: MatchupTable }) {
       <div className="mt-4">
         <h3 className="mb-2 text-sm font-semibold">最適持ち込みセット</h3>
         {notReady ? (
-          <p className="rounded-lg border border-dashed border-line bg-panel-2/30 px-4 py-6 text-center text-xs text-muted">
+          <p className="rounded-lg border border-dashed border-line bg-panel-2 px-4 py-6 text-center text-xs text-muted">
             {notReady}
           </p>
         ) : (
@@ -76,7 +76,7 @@ export function TournamentPanel({ table }: { table: MatchupTable }) {
               {results.slice(0, SHOW_MAX).map((r, i) => (
                 <li
                   key={r.deckIds.join(':')}
-                  className="flex items-center gap-3 rounded-lg border border-line bg-panel-2/40 px-3 py-2"
+                  className="flex items-center gap-3 rounded-lg border border-line bg-panel-2 px-3 py-2"
                 >
                   <span
                     className={`w-7 text-center font-display text-lg font-bold ${

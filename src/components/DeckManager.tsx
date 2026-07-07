@@ -37,14 +37,14 @@ function DeckForm({
         value={value.name}
         onChange={(e) => setValue((v) => ({ ...v, name: e.target.value }))}
         placeholder="デッキ名（例: 秘術ウィッチ）"
-        className="w-full rounded-md border border-line bg-abyss/60 px-2.5 py-1.5 text-sm placeholder:text-muted/60 focus:border-gold focus:outline-none"
+        className="w-full rounded-md border border-line bg-abyss px-2.5 py-1.5 text-sm placeholder:text-muted/60 focus:border-gold focus:outline-none"
       />
       <div className="flex items-center gap-2">
         <ClassDot className={value.className} />
         <select
           value={value.className}
           onChange={(e) => setValue((v) => ({ ...v, className: e.target.value as ClassName }))}
-          className="flex-1 rounded-md border border-line bg-abyss/60 px-2 py-1.5 text-sm focus:border-gold focus:outline-none"
+          className="flex-1 rounded-md border border-line bg-abyss px-2 py-1.5 text-sm focus:border-gold focus:outline-none"
         >
           {CLASS_NAMES.map((c) => (
             <option key={c} value={c}>
@@ -106,7 +106,7 @@ function DeckRow({ table, deck, drag }: { table: MatchupTable; deck: Deck; drag:
 
   if (editing) {
     return (
-      <li className="rounded-lg border border-gold/50 bg-panel-2/60 p-2.5">
+      <li className="rounded-lg border border-gold/50 bg-panel-2 p-2.5">
         <DeckForm
           initial={{ name: deck.name, className: deck.className, power: deck.power }}
           submitLabel="保存"
@@ -130,7 +130,7 @@ function DeckRow({ table, deck, drag }: { table: MatchupTable; deck: Deck; drag:
       onDragEnter={drag.onDragEnter}
       onDragOver={(e) => e.preventDefault()}
       onDragEnd={drag.onDragEnd}
-      className={`group cursor-grab rounded-lg border border-line bg-panel-2/40 px-2.5 py-2 transition hover:border-line/80 hover:bg-panel-2/70 active:cursor-grabbing ${
+      className={`group cursor-grab rounded-lg border border-line bg-panel-2 px-2.5 py-2 transition hover:border-line/80 hover:bg-panel-2 active:cursor-grabbing ${
         drag.isDragging ? 'opacity-40' : ''
       }`}
     >

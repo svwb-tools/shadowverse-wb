@@ -110,7 +110,7 @@ export function MatrixGrid({
 
   if (myDecks.length === 0 || fieldDecks.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-line bg-panel/60 px-6 py-14 text-center">
+      <div className="rounded-xl border border-dashed border-line bg-panel px-6 py-14 text-center">
         <p className="font-display text-lg font-semibold text-muted">マトリクスはまだ空です</p>
         <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted/80">
           デッキ管理でデッキを追加し、「自分が使う」（行）と「環境にいる」（列）にチェックを入れると、ここに相性マトリクスが表示されます。
@@ -175,14 +175,14 @@ export function MatrixGrid({
                   coef: Math.min(10, Math.max(0, Number(e.target.value) || 0)),
                 })
               }
-              className="w-14 rounded border border-line bg-abyss/60 px-1.5 py-0.5 text-center font-display text-fg focus:border-gold focus:outline-none"
+              className="w-14 rounded border border-line bg-abyss px-1.5 py-0.5 text-center font-display text-fg focus:border-gold focus:outline-none"
             />
             %／パワー差1
           </label>
         )}
       </div>
       {showHelp && (
-        <div className="mb-2.5 rounded-lg border border-gold/30 bg-panel-2/50 px-3.5 py-3 text-xs leading-relaxed text-muted">
+        <div className="mb-2.5 rounded-lg border border-gold/30 bg-panel-2 px-3.5 py-3 text-xs leading-relaxed text-muted">
           <p className="font-semibold text-fg">デッキパワー補正とは</p>
           <p className="mt-1">
             相性表の上では有利でも、デッキの地力（パワー）が足りず勝ち切れないことがあります。
@@ -190,7 +190,7 @@ export function MatrixGrid({
             <span className="font-semibold text-fg">「デッキパワー補正値」</span>
             でマトリクスと集計（ランクマ・大会）を表示します。
           </p>
-          <p className="mt-1.5 rounded bg-abyss/50 px-2 py-1 font-display tracking-wide text-fg">
+          <p className="mt-1.5 rounded bg-abyss px-2 py-1 font-display tracking-wide text-fg">
             補正値 = 相性値 + 係数 × (自分のパワー − 相手のパワー)
           </p>
           <p className="mt-1.5">
