@@ -134,9 +134,9 @@ export function Editor({ tableId, onBack }: { tableId: string; onBack: () => voi
             <nav className="mb-4 flex gap-1 border-b border-line">
               {(
                 [
+                  { key: 'records', label: '対戦記録' },
                   { key: 'ladder', label: 'ランクマ用' },
                   { key: 'tournament', label: '大会用' },
-                  { key: 'records', label: '対戦記録' },
                 ] as const
               ).map((t) => (
                 <button
