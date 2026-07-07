@@ -5,7 +5,7 @@ import type { MatchupTable } from '../types'
 import { ClassDot } from './ClassDot'
 
 export function RecordsPanel({ table }: { table: MatchupTable }) {
-  const { addGameResult, adjustRecord, resetOverlayBaseline } = useStore()
+  const { addGameResult, adjustRecord, resetOverlayBaseline, setOverlayTextColor } = useStore()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [fixMode, setFixMode] = useState(false)
   const [showGuide, setShowGuide] = useState(false)
@@ -170,6 +170,18 @@ export function RecordsPanel({ table }: { table: MatchupTable }) {
           >
             使い方
           </button>
+          <label
+            className="flex cursor-pointer items-center gap-1.5 text-[11px] text-muted"
+            title="オーバーレイの文字色。暗い色を選ぶと縁取りが自動で白系に切り替わります"
+          >
+            文字色
+            <input
+              type="color"
+              value={table.overlayTextColor ?? '#ffffff'}
+              onChange={(e) => setOverlayTextColor(table.id, e.target.value)}
+              className="h-6 w-9 cursor-pointer rounded border border-line bg-transparent p-0.5"
+            />
+          </label>
         </div>
         <p className="mt-2 text-[11px] leading-relaxed text-muted">
           専用ウィンドウに「デッキごとの今日の勝敗と合計」を表示します。ここで記録するたびに自動で更新されます。OBSでの設定手順は「使い方」を見てください。

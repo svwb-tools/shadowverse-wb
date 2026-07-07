@@ -103,6 +103,12 @@ describe('store', () => {
     expect(s().tables[tableId]!.shares[x]).toBe(100)
     expect(s().tables[tableId]!.shares[y]).toBe(0)
 
+    // オーバーレイ文字色は #rrggbb のみ受け付ける
+    s().setOverlayTextColor(tableId, '#ff8800')
+    expect(s().tables[tableId]!.overlayTextColor).toBe('#ff8800')
+    s().setOverlayTextColor(tableId, 'red; background: url(x)')
+    expect(s().tables[tableId]!.overlayTextColor).toBe('#ff8800')
+
     s().deleteTable(tableId)
   })
 

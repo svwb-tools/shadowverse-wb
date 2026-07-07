@@ -62,6 +62,8 @@ interface AppStore {
   applySharesFromRecords: (tableId: string) => void
   /** 配信オーバーレイの「今日の分」カウントをリセット（現在の通算をスナップショット） */
   resetOverlayBaseline: (tableId: string) => void
+  /** 配信オーバーレイの文字色を設定（#rrggbb のみ受け付ける） */
+  setOverlayTextColor: (tableId: string, color: string) => void
   /** 共有・インポートされた相性表を新しいIDでコピーとして追加する */
   importTable: (table: MatchupTable) => string
 }
@@ -247,6 +249,11 @@ export const useStore = create<AppStore>()(
               Object.entries(t.records).map(([key, rec]) => [key, { ...rec }]),
             ),
           })),
+
+        setOverlayTextColor: (tableId, color) => {
+          if (!/^#[0-9a-fA-F]{6}$/.test(color)) return
+          mutate(tableId, (t) => ({ ...t, overlayTextColor: color }))
+        },
 
         applySharesFromRecords: (tableId) =>
           mutate(tableId, (t) => {

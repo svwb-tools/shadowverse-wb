@@ -34,10 +34,17 @@ describe('share round-trip', () => {
     expect(parseTableJson(serializeTable(table))).toEqual(table)
   })
 
-  it('配信カウンタの基準点（overlayBaseline）は共有に含めない', () => {
-    const withBaseline = { ...table, overlayBaseline: { 'a:b': { wins: 3, losses: 1 } } }
-    expect(serializeTable(withBaseline)).not.toContain('overlayBaseline')
-    expect(decodeTableFromHash(encodeTableToHash(withBaseline))?.overlayBaseline).toBeUndefined()
+  it('端末ローカル設定（配信カウンタ基準点・オーバーレイ文字色）は共有に含めない', () => {
+    const withLocal = {
+      ...table,
+      overlayBaseline: { 'a:b': { wins: 3, losses: 1 } },
+      overlayTextColor: '#123456',
+    }
+    expect(serializeTable(withLocal)).not.toContain('overlayBaseline')
+    expect(serializeTable(withLocal)).not.toContain('overlayTextColor')
+    const decoded = decodeTableFromHash(encodeTableToHash(withLocal))
+    expect(decoded?.overlayBaseline).toBeUndefined()
+    expect(decoded?.overlayTextColor).toBeUndefined()
   })
 })
 

@@ -3,9 +3,9 @@ import { CLASS_NAMES, type ClassName, type Deck, type MatchupTable } from '../ty
 
 const PAYLOAD_VERSION = 1
 
-/** 端末ローカルの状態（配信カウンタの基準点）は共有・エクスポートに含めない */
+/** 端末ローカルの状態（配信カウンタの基準点・オーバーレイ文字色）は共有・エクスポートに含めない */
 const toShareable = (table: MatchupTable): MatchupTable => {
-  const { overlayBaseline: _overlayBaseline, ...rest } = table
+  const { overlayBaseline: _overlayBaseline, overlayTextColor: _overlayTextColor, ...rest } = table
   return rest
 }
 

@@ -79,6 +79,8 @@ export interface MatchupTable {
    * 端末ローカルの状態なので共有・エクスポートには含めない
    */
   overlayBaseline?: Record<string, WinLoss>
+  /** 配信オーバーレイの文字色（#rrggbb）。端末ローカルの設定で共有には含めない */
+  overlayTextColor?: string
   defaultTab: TabKind
   tournamentRule: TournamentRule
   inputScale: 'five' | 'percent'
