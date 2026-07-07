@@ -51,9 +51,9 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
       <div className="grid gap-8 lg:grid-cols-[300px_1fr]">
         {/* デッキ遭遇率の入力 */}
         <div>
-          <div className="mb-1.5 flex items-baseline justify-between gap-3">
+          <div className="mb-1.5 flex items-center justify-between gap-3">
             <h3 className="text-sm font-semibold tracking-wide">デッキの遭遇率</h3>
-            <span className="flex gap-3">
+            <span className="flex gap-1.5">
               {Object.keys(table.records).length > 0 && (
                 <button
                   onClick={() => {
@@ -61,15 +61,17 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
                       applySharesFromRecords(table.id)
                     }
                   }}
-                  className="text-[11px] text-muted underline transition hover:text-fg"
+                  title="対戦記録で実際に当たった回数の比率でスライダーを設定します"
+                  className="rounded-md border border-line px-2.5 py-1 text-[11px] text-muted transition hover:border-muted hover:text-fg"
                 >
-                  実績から設定
+                  対戦記録から設定
                 </button>
               )}
               {hasShares && (
                 <button
                   onClick={() => resetShares(table.id)}
-                  className="text-[11px] text-muted underline transition hover:text-fg"
+                  title="すべてのスライダーを未設定（全デッキ均等）に戻します"
+                  className="rounded-md border border-line px-2.5 py-1 text-[11px] text-muted transition hover:border-muted hover:text-fg"
                 >
                   均等に戻す
                 </button>
