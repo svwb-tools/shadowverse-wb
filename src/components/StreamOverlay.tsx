@@ -5,8 +5,8 @@ import { ClassDot } from './ClassDot'
 
 /** OBSのクロマキーで抜くための背景色（グリーンバック） */
 const CHROMA_GREEN = '#00ff00'
-/** 配信画面上で読めるよう、テーマに依存しない固定の暗色パネルで描く */
-const PANEL = 'rgba(10, 15, 28, 0.94)'
+/** クロマキーで巻き込まれないよう完全不透明・テーマ非依存の暗色パネルで描く */
+const PANEL = '#0a0f1c'
 const INK = '#f2f0e9'
 const INK_MUTED = 'rgba(242, 240, 233, 0.65)'
 const GOLD = '#f2c96d'
@@ -14,13 +14,18 @@ const GOLD = '#f2c96d'
 export function StreamOverlay({ tableId }: { tableId: string }) {
   const table = useStore((s) => s.tables[tableId])
 
-  // 本体ウィンドウでの記録を localStorage 経由で受け取って即時反映する
+  // 本体ウィンドウでの記録を localStorage 経由で受け取って即時反映する。
+  // storage イベントが主で、取りこぼし対策に数秒ごとの再読込も併用する
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key === 'svwb-matchup-v1') void useStore.persist.rehydrate()
     }
     window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
+    const poll = setInterval(() => void useStore.persist.rehydrate(), 3000)
+    return () => {
+      window.removeEventListener('storage', onStorage)
+      clearInterval(poll)
+    }
   }, [])
 
   useEffect(() => {
