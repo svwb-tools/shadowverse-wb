@@ -53,19 +53,26 @@ function DeckForm({
           ))}
         </select>
       </div>
-      <div className="flex items-center gap-2.5">
-        <span className="text-xs text-muted">パワー</span>
-        <input
-          type="range"
-          min={1}
-          max={10}
-          value={value.power}
-          onChange={(e) => setValue((v) => ({ ...v, power: Number(e.target.value) }))}
-          className="flex-1"
-        />
-        <span className="w-8 text-right font-display text-base font-semibold text-gold">
-          {value.power}
-        </span>
+      <div>
+        <div className="flex flex-wrap items-baseline gap-x-1.5">
+          <span className="text-xs font-medium">パワー</span>
+          <span className="text-[10px] leading-relaxed text-muted">
+            — デッキの地力の主観評価（1〜10）。デッキパワー補正と2軸ビューで使います
+          </span>
+        </div>
+        <div className="mt-1 flex items-center gap-2.5">
+          <input
+            type="range"
+            min={1}
+            max={10}
+            value={value.power}
+            onChange={(e) => setValue((v) => ({ ...v, power: Number(e.target.value) }))}
+            className="min-w-0 flex-1"
+          />
+          <span className="w-8 shrink-0 text-right font-display text-base font-semibold text-gold">
+            {value.power}
+          </span>
+        </div>
       </div>
       <div className="flex gap-2">
         <button
