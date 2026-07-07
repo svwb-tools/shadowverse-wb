@@ -20,7 +20,8 @@ function download(href: string, filename: string) {
 export function Editor({ tableId, onBack }: { tableId: string; onBack: () => void }) {
   const table = useStore((s) => s.tables[tableId])
   const updateTableMeta = useStore((s) => s.updateTableMeta)
-  const [tab, setTab] = useState<TabKind | 'records'>(table?.defaultTab ?? 'ladder')
+  // 開いたときは常に対戦記録タブから始める
+  const [tab, setTab] = useState<TabKind | 'records'>('records')
   const matrixRef = useRef<HTMLTableElement>(null)
   const [toast, setToast] = useState<string | null>(null)
   const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined)

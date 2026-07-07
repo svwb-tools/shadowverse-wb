@@ -43,7 +43,7 @@ function CreateDialog({
           className="mt-1 w-full rounded-md border border-line bg-abyss px-3 py-2 text-sm placeholder:text-muted/60 focus:border-gold focus:outline-none"
         />
 
-        <label className="mt-4 block text-xs text-muted">主な用途（最初に開く集計タブ。後から切替可能）</label>
+        <label className="mt-4 block text-xs text-muted">主な用途（一覧のカードにラベルとして表示されます）</label>
         <div className="mt-1 grid grid-cols-2 gap-2">
           {(
             [
