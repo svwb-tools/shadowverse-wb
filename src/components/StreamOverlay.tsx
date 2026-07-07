@@ -5,11 +5,11 @@ import { ClassDot } from './ClassDot'
 
 /** OBSのクロマキーで抜くための背景色（グリーンバック） */
 const CHROMA_GREEN = '#00ff00'
-/** クロマキーで巻き込まれないよう完全不透明・テーマ非依存の暗色パネルで描く */
-const PANEL = '#0a0f1c'
-const INK = '#f2f0e9'
-const INK_MUTED = 'rgba(242, 240, 233, 0.65)'
+/** 文字は白＋暗い縁取りで、どんな配信画面の上でも読めるようにする */
+const INK = '#ffffff'
+const INK_MUTED = 'rgba(255, 255, 255, 0.75)'
 const GOLD = '#f2c96d'
+const TEXT_SHADOW = '0 1px 2px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.6)'
 
 export function StreamOverlay({ tableId }: { tableId: string }) {
   const table = useStore((s) => s.tables[tableId])
@@ -35,7 +35,7 @@ export function StreamOverlay({ tableId }: { tableId: string }) {
   if (!table) {
     return (
       <div className="fixed inset-0 p-6" style={{ backgroundColor: CHROMA_GREEN }}>
-        <p className="rounded-xl px-4 py-3 text-sm" style={{ backgroundColor: PANEL, color: INK }}>
+        <p className="text-sm font-bold" style={{ color: INK, textShadow: TEXT_SHADOW }}>
           相性表が見つかりません。アプリ側の「配信オーバーレイを開く」から開き直してください。
         </p>
       </div>
@@ -56,8 +56,8 @@ export function StreamOverlay({ tableId }: { tableId: string }) {
           return (
             <div
               key={row.deckId}
-              className="flex items-center gap-3 rounded-xl px-4 py-2.5"
-              style={{ backgroundColor: PANEL, color: INK }}
+              className="flex items-center gap-3 px-1 py-1"
+              style={{ color: INK, textShadow: TEXT_SHADOW }}
             >
               <ClassDot className={deck.className} size={10} />
               <span className="min-w-0 max-w-52 flex-1 truncate text-base font-bold" title={deck.name}>
@@ -84,8 +84,8 @@ export function StreamOverlay({ tableId }: { tableId: string }) {
         })}
 
         <div
-          className="flex items-center gap-3 rounded-xl px-4 py-2.5"
-          style={{ backgroundColor: PANEL, color: GOLD }}
+          className="flex items-center gap-3 px-1 py-1"
+          style={{ color: GOLD, textShadow: TEXT_SHADOW }}
         >
           <span className="min-w-0 flex-1 text-base font-bold tracking-wide">TOTAL</span>
           <span className="font-display text-2xl font-bold tabular-nums">
@@ -104,7 +104,7 @@ export function StreamOverlay({ tableId }: { tableId: string }) {
         </div>
 
         {decks.length === 0 && (
-          <p className="rounded-xl px-4 py-3 text-sm" style={{ backgroundColor: PANEL, color: INK }}>
+          <p className="text-sm font-bold" style={{ color: INK, textShadow: TEXT_SHADOW }}>
             「自分が使う」デッキを登録すると、ここにデッキごとの戦績が表示されます。
           </p>
         )}
