@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@theme {
+  --font-body: "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+  --font-display: "Rajdhani", "Zen Kaku Gothic New", sans-serif;
+
+  --color-abyss: #0a0f1c;
+  --color-panel: #121a2b;
+  --color-panel-2: #182238;
+  --color-line: #253352;
+  --color-fg: #e9e7de;
+  --color-muted: #8e97ad;
+  --color-gold: #d8a84e;
+  --color-gold-bright: #f2c96d;
+  --color-win: #3ecf9a;
+  --color-lose: #e35d6a;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-abyss);
+  color: var(--color-fg);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(1100px 550px at 88% -10%, rgba(216, 168, 78, 0.09), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(78, 128, 216, 0.07), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* うっすらとした方眼で「分析ボード」の空気を出す */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(142, 151, 173, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(142, 151, 173, 0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse at 50% 0%, black, transparent 75%);
+}
+
+input[type="checkbox"],
+input[type="range"],
+input[type="radio"] {
+  accent-color: var(--color-gold);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #253352;
+  border-radius: 6px;
+  border: 2px solid var(--color-abyss);
+}
+
+/* number input のスピナーを消してマトリクスをすっきりさせる */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
