@@ -6,6 +6,7 @@ import type { TabKind } from '../types'
 import { DeckManager } from './DeckManager'
 import { LadderPanel } from './LadderPanel'
 import { MatrixGrid } from './MatrixGrid'
+import { ThemeToggle } from './ThemeToggle'
 import { TournamentPanel } from './TournamentPanel'
 
 function download(href: string, filename: string) {
@@ -48,7 +49,9 @@ export function Editor({ tableId, onBack }: { tableId: string; onBack: () => voi
     }
     try {
       const dataUrl = await toPng(matrixRef.current, {
-        backgroundColor: '#0a0f1c',
+        backgroundColor:
+          getComputedStyle(document.documentElement).getPropertyValue('--bg-abyss').trim() ||
+          '#0a0f1c',
         pixelRatio: 2,
       })
       download(dataUrl, `${table.name || '相性表'}.png`)
@@ -131,6 +134,7 @@ export function Editor({ tableId, onBack }: { tableId: string; onBack: () => voi
               データ保存
             </button>
           </div>
+          <ThemeToggle />
           <span className="hidden shrink-0 text-[10px] tracking-wider text-muted/70 sm:inline">
             自動保存
           </span>

@@ -1,8 +1,8 @@
 import type { ClassName } from './types'
 
-// ダーク背景(#121a2b)上で明度・彩度・CVD分離・コントラストを検証済みのパレット
+// ライト(#fdfcf8)・ダーク(#121a2b)両方の背景で明度・彩度・CVD分離・コントラストを検証済みのパレット
 export const CLASS_COLORS: Record<ClassName, string> = {
-  エルフ: '#3fae5c',
+  エルフ: '#35a04e',
   ロイヤル: '#b8892b',
   ウィッチ: '#8f6ce8',
   ドラゴン: '#d96f2a',
@@ -24,11 +24,11 @@ export function fiveLabel(value: number): string {
   return FIVE_STEPS.find((s) => s.value === value)?.label ?? `${value}`
 }
 
-/** 勝率に応じたセル背景色（勝ち=緑 / 負け=赤、50から離れるほど濃く） */
+/** 勝率に応じたセル背景色（勝ち=緑 / 負け=赤、50から離れるほど濃く）。色はテーマ変数に追従 */
 export function winTone(value: number): string {
-  if (value > 50) return `rgba(62, 207, 154, ${(0.08 + ((value - 50) / 50) * 0.42).toFixed(3)})`
-  if (value < 50) return `rgba(227, 93, 106, ${(0.08 + ((50 - value) / 50) * 0.42).toFixed(3)})`
-  return 'rgba(142, 151, 173, 0.10)'
+  if (value > 50) return `rgb(var(--tone-win) / ${(0.08 + ((value - 50) / 50) * 0.42).toFixed(3)})`
+  if (value < 50) return `rgb(var(--tone-lose) / ${(0.08 + ((50 - value) / 50) * 0.42).toFixed(3)})`
+  return 'rgb(var(--tone-flat) / 0.10)'
 }
 
 export function formatDate(iso: string): string {

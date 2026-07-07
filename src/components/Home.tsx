@@ -3,6 +3,7 @@ import { formatDate } from '../constants'
 import { parseTableJson } from '../logic/share'
 import { useStore } from '../store'
 import type { TabKind, TournamentRule } from '../types'
+import { ThemeToggle } from './ThemeToggle'
 
 function CreateDialog({
   onClose,
@@ -157,10 +158,13 @@ export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
   return (
     <div className="mx-auto max-w-5xl px-5 pb-16">
       <header className="pb-8 pt-14">
-        <p className="flex items-center gap-2 font-display text-[11px] font-semibold tracking-[0.35em] text-gold">
-          <span className="inline-block h-2 w-2 rotate-45 bg-gold" />
-          SHADOWVERSE: WORLDS BEYOND
-        </p>
+        <div className="flex items-start justify-between gap-3">
+          <p className="flex items-center gap-2 font-display text-[11px] font-semibold tracking-[0.35em] text-gold">
+            <span className="inline-block h-2 w-2 rotate-45 bg-gold" />
+            SHADOWVERSE: WORLDS BEYOND
+          </p>
+          <ThemeToggle />
+        </div>
         <h1 className="mt-2 font-display text-4xl font-bold tracking-wide">相性表メーカー</h1>
         <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
           相性 × デッキパワーで環境を読むための自分専用マトリクス。データはこの端末のブラウザ（localStorage）に自動保存されます。

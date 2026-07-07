@@ -219,7 +219,7 @@ export function MatrixGrid({
                         isMirror
                           ? {
                               backgroundImage:
-                                'repeating-linear-gradient(45deg, rgba(142,151,173,0.08) 0 4px, transparent 4px 9px)',
+                                'repeating-linear-gradient(45deg, rgb(var(--tone-flat) / 0.10) 0 4px, transparent 4px 9px)',
                             }
                           : undefined
                       }

@@ -34,8 +34,9 @@ export function ScatterView({ points }: { points: ScatterPoint[] }) {
   const xTicks: number[] = []
   for (let v = Math.ceil(domain.lo / step) * step; v <= domain.hi; v += step) xTicks.push(v)
   const yTicks = [2, 4, 6, 8, 10]
-  const gridStroke = 'rgba(142, 151, 173, 0.13)'
-  const inkMuted = 'rgba(142, 151, 173, 0.9)'
+  // SVGの属性は var() を解釈しないため、テーマ変数は style で当てる
+  const mutedText = { fill: 'var(--ink-muted)' } as const
+  const gridLine = { stroke: 'var(--chart-grid)' } as const
 
   return (
     <div className="rounded-lg border border-line bg-panel-2/30 p-3">
@@ -44,13 +45,16 @@ export function ScatterView({ points }: { points: ScatterPoint[] }) {
         <span>右下に落ちるデッキは「相性は良いがパワー不足」の相性番長候補です。</span>
         <span className="flex items-center gap-1.5">
           <svg width="12" height="12" viewBox="0 0 12 12">
-            <circle cx="6" cy="6" r="5" fill="#8e97ad" />
+            <circle cx="6" cy="6" r="5" style={{ fill: 'var(--ink-muted)' }} />
           </svg>
           自分が使うデッキ
         </span>
         <span className="flex items-center gap-1.5">
           <svg width="12" height="12" viewBox="0 0 12 12">
-            <circle cx="6" cy="6" r="4.5" fill="#8e97ad" fillOpacity="0.25" stroke="#8e97ad" strokeWidth="1.5" strokeDasharray="2.5 2" />
+            <circle
+              cx="6" cy="6" r="4.5" fillOpacity="0.25" strokeWidth="1.5" strokeDasharray="2.5 2"
+              style={{ fill: 'var(--ink-muted)', stroke: 'var(--ink-muted)' }}
+            />
           </svg>
           環境のみのデッキ（自分のデッキへの勝率から逆算）
         </span>
@@ -60,16 +64,16 @@ export function ScatterView({ points }: { points: ScatterPoint[] }) {
           {/* グリッド */}
           {xTicks.map((v) => (
             <g key={`x${v}`}>
-              <line x1={sx(v)} y1={M.top} x2={sx(v)} y2={H - M.bottom} stroke={gridStroke} />
-              <text x={sx(v)} y={H - M.bottom + 14} textAnchor="middle" fontSize={10} fill={inkMuted}>
+              <line x1={sx(v)} y1={M.top} x2={sx(v)} y2={H - M.bottom} style={gridLine} />
+              <text x={sx(v)} y={H - M.bottom + 14} textAnchor="middle" fontSize={10} style={mutedText}>
                 {v}
               </text>
             </g>
           ))}
           {yTicks.map((p) => (
             <g key={`y${p}`}>
-              <line x1={M.left} y1={sy(p)} x2={W - M.right} y2={sy(p)} stroke={gridStroke} />
-              <text x={M.left - 8} y={sy(p) + 3.5} textAnchor="end" fontSize={10} fill={inkMuted}>
+              <line x1={M.left} y1={sy(p)} x2={W - M.right} y2={sy(p)} style={gridLine} />
+              <text x={M.left - 8} y={sy(p) + 3.5} textAnchor="end" fontSize={10} style={mutedText}>
                 {p}
               </text>
             </g>
@@ -79,31 +83,31 @@ export function ScatterView({ points }: { points: ScatterPoint[] }) {
           {50 >= domain.lo && 50 <= domain.hi && (
             <line
               x1={sx(50)} y1={M.top} x2={sx(50)} y2={H - M.bottom}
-              stroke="rgba(233, 231, 222, 0.3)" strokeDasharray="4 4"
+              style={{ stroke: 'var(--chart-ref)' }} strokeDasharray="4 4"
             />
           )}
           <line
             x1={M.left} y1={sy(5.5)} x2={W - M.right} y2={sy(5.5)}
-            stroke="rgba(233, 231, 222, 0.14)" strokeDasharray="4 4"
+            style={{ stroke: 'var(--chart-ref-weak)' }} strokeDasharray="4 4"
           />
 
           {/* 象限ラベル */}
-          <text x={W - M.right - 6} y={M.top + 12} textAnchor="end" fontSize={10} fill={inkMuted} opacity={0.75}>
+          <text x={W - M.right - 6} y={M.top + 12} textAnchor="end" fontSize={10} style={mutedText} opacity={0.75}>
             本命
           </text>
-          <text x={W - M.right - 6} y={H - M.bottom - 8} textAnchor="end" fontSize={10} fill={inkMuted} opacity={0.75}>
+          <text x={W - M.right - 6} y={H - M.bottom - 8} textAnchor="end" fontSize={10} style={mutedText} opacity={0.75}>
             相性番長（パワー不足注意）
           </text>
-          <text x={M.left + 6} y={M.top + 12} textAnchor="start" fontSize={10} fill={inkMuted} opacity={0.75}>
+          <text x={M.left + 6} y={M.top + 12} textAnchor="start" fontSize={10} style={mutedText} opacity={0.75}>
             地力はあるが逆風
           </text>
 
           {/* 軸ラベル */}
-          <text x={M.left + innerW / 2} y={H - 6} textAnchor="middle" fontSize={10} fill={inkMuted}>
+          <text x={M.left + innerW / 2} y={H - 6} textAnchor="middle" fontSize={10} style={mutedText}>
             対環境期待勝率（%）
           </text>
           <text
-            x={13} y={M.top + innerH / 2} textAnchor="middle" fontSize={10} fill={inkMuted}
+            x={13} y={M.top + innerH / 2} textAnchor="middle" fontSize={10} style={mutedText}
             transform={`rotate(-90 13 ${M.top + innerH / 2})`}
           >
             デッキパワー
@@ -129,12 +133,14 @@ export function ScatterView({ points }: { points: ScatterPoint[] }) {
                 ) : (
                   <circle
                     cx={sx(p.expected)} cy={sy(p.deck.power)} r={7}
-                    fill={CLASS_COLORS[p.deck.className]} stroke="#121a2b" strokeWidth={2}
+                    fill={CLASS_COLORS[p.deck.className]} strokeWidth={2}
+                    style={{ stroke: 'var(--chart-surface)' }}
                   />
                 )}
                 <text
                   x={sx(p.expected) + (labelLeft ? -11 : 11)} y={sy(p.deck.power) + 4}
-                  textAnchor={labelLeft ? 'end' : 'start'} fontSize={11} fill="#e9e7de"
+                  textAnchor={labelLeft ? 'end' : 'start'} fontSize={11}
+                  style={{ fill: 'var(--ink-fg)' }}
                 >
                   {p.deck.name}
                 </text>
