@@ -135,8 +135,8 @@ export function Editor({ tableId, onBack }: { tableId: string; onBack: () => voi
               {(
                 [
                   { key: 'records', label: '対戦記録' },
-                  { key: 'ladder', label: 'ランクマダッシュボード' },
-                  { key: 'tournament', label: '大会ダッシュボード' },
+                  { key: 'ladder', label: 'ランクマッチダッシュボード' },
+                  { key: 'tournament', label: '大会デッキ選択' },
                 ] as const
               ).map((t) => (
                 <button
