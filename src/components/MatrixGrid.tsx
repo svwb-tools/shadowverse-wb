@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type Ref } from 'react'
 import { FIVE_STEPS, fiveLabel, winTone } from '../constants'
 import { cellKey } from '../logic/matchup'
 import { useStore } from '../store'
@@ -77,7 +77,7 @@ function DeckLabel({ deck }: { deck: Deck }) {
   return (
     <div className="flex min-w-0 items-center gap-1.5">
       <ClassDot className={deck.className} size={7} />
-      <span className="max-w-[7.5rem] truncate text-xs font-medium" title={deck.name}>
+      <span className="max-w-30 truncate text-xs font-medium" title={deck.name}>
         {deck.name}
       </span>
       <span className="font-display text-[10px] font-semibold text-muted">P{deck.power}</span>
@@ -85,11 +85,27 @@ function DeckLabel({ deck }: { deck: Deck }) {
   )
 }
 
-export function MatrixGrid({ table }: { table: MatchupTable }) {
+export function MatrixGrid({
+  table,
+  exportRef,
+}: {
+  table: MatchupTable
+  exportRef?: Ref<HTMLTableElement>
+}) {
+  const { setPowerAdjust } = useStore()
   const [editing, setEditing] = useState<EditingPos | null>(null)
   const deckOf = useMemo(() => new Map(table.decks.map((d) => [d.id, d])), [table.decks])
   const myDecks = table.myDeckIds.map((id) => deckOf.get(id)).filter((d): d is Deck => !!d)
   const fieldDecks = table.fieldDeckIds.map((id) => deckOf.get(id)).filter((d): d is Deck => !!d)
+
+  const adjust = table.powerAdjust
+  // 表示用のパワー補正値。編集は常に生値に対して行う
+  const displayValue = (raw: number, myDeck: Deck, fieldDeck: Deck) =>
+    adjust.enabled
+      ? Math.round(
+          Math.min(100, Math.max(0, raw + adjust.coef * (myDeck.power - fieldDeck.power))),
+        )
+      : raw
 
   if (myDecks.length === 0 || fieldDecks.length === 0) {
     return (
@@ -104,8 +120,37 @@ export function MatrixGrid({ table }: { table: MatchupTable }) {
 
   return (
     <div>
+      <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 px-1 text-xs text-muted">
+        <label className="flex cursor-pointer items-center gap-1.5">
+          <input
+            type="checkbox"
+            checked={adjust.enabled}
+            onChange={(e) => setPowerAdjust(table.id, { enabled: e.target.checked })}
+          />
+          パワー補正（表示と集計に反映）
+        </label>
+        {adjust.enabled && (
+          <label className="flex items-center gap-1.5">
+            係数
+            <input
+              type="number"
+              min={0}
+              max={10}
+              step={0.5}
+              value={adjust.coef}
+              onChange={(e) =>
+                setPowerAdjust(table.id, {
+                  coef: Math.min(10, Math.max(0, Number(e.target.value) || 0)),
+                })
+              }
+              className="w-14 rounded border border-line bg-abyss/60 px-1.5 py-0.5 text-center font-display text-fg focus:border-gold focus:outline-none"
+            />
+            %／パワー差1（セル編集は常に生値）
+          </label>
+        )}
+      </div>
       <div className="max-h-[62vh] overflow-auto rounded-xl border border-line bg-panel">
-        <table className="w-max min-w-full border-collapse">
+        <table ref={exportRef} className="w-max min-w-full border-collapse bg-panel">
           <thead>
             <tr>
               <th className="sticky left-0 top-0 z-30 bg-panel px-3 py-2.5 text-left text-[11px] font-normal text-muted">
@@ -114,7 +159,7 @@ export function MatrixGrid({ table }: { table: MatchupTable }) {
               {fieldDecks.map((deck) => (
                 <th
                   key={deck.id}
-                  className="sticky top-0 z-20 min-w-[5rem] border-l border-line/50 bg-panel px-2 py-2.5"
+                  className="sticky top-0 z-20 min-w-20 border-l border-line/50 bg-panel px-2 py-2.5"
                 >
                   <div className="flex justify-center">
                     <DeckLabel deck={deck} />
@@ -159,15 +204,25 @@ export function MatrixGrid({ table }: { table: MatchupTable }) {
                             setEditing({ myDeckId: myDeck.id, fieldDeckId: fieldDeck.id })
                           }
                           title={`${myDeck.name} vs ${fieldDeck.name}`}
-                          className="relative flex h-9 w-full min-w-[5rem] items-center justify-center font-display text-[15px] font-semibold transition hover:ring-1 hover:ring-inset hover:ring-gold/70"
-                          style={cell ? { backgroundColor: winTone(cell.value) } : undefined}
+                          className="relative flex h-9 w-full min-w-20 items-center justify-center font-display text-[15px] font-semibold transition hover:ring-1 hover:ring-inset hover:ring-gold/70"
+                          style={
+                            cell
+                              ? {
+                                  backgroundColor: winTone(
+                                    displayValue(cell.value, myDeck, fieldDeck),
+                                  ),
+                                }
+                              : undefined
+                          }
                         >
                           {cell ? (
                             <span className={cell.source === 'auto' ? 'opacity-55' : ''}>
                               {table.inputScale === 'five' ? (
-                                <span className="text-[13px]">{fiveLabel(cell.value)}</span>
+                                <span className="text-[13px]">
+                                  {fiveLabel(displayValue(cell.value, myDeck, fieldDeck))}
+                                </span>
                               ) : (
-                                cell.value
+                                displayValue(cell.value, myDeck, fieldDeck)
                               )}
                             </span>
                           ) : (
@@ -203,6 +258,7 @@ export function MatrixGrid({ table }: { table: MatchupTable }) {
         </span>
         <span>セルをクリックして入力（空にすると削除）</span>
         <span>薄い数字 = ミラーからの自動入力。手入力すると上書きされなくなります</span>
+        {adjust.enabled && <span className="text-gold/80">パワー補正値を表示中（編集は生値）</span>}
       </div>
     </div>
   )

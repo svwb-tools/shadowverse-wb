@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { formatDate } from '../constants'
+import { parseTableJson } from '../logic/share'
 import { useStore } from '../store'
 import type { TabKind, TournamentRule } from '../types'
 
@@ -118,12 +119,23 @@ function CreateDialog({
 export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
   const tables = useStore((s) => s.tables)
   const deleteTable = useStore((s) => s.deleteTable)
+  const importTable = useStore((s) => s.importTable)
   const [creating, setCreating] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const sorted = useMemo(
     () => Object.values(tables).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
     [tables],
   )
+
+  const importJsonFile = async (file: File) => {
+    const table = parseTableJson(await file.text())
+    if (!table) {
+      alert('JSONを読み込めませんでした。このアプリからエクスポートしたファイルか確認してください。')
+      return
+    }
+    onOpen(importTable(table))
+  }
 
   return (
     <div className="mx-auto max-w-5xl px-5 pb-16">
@@ -136,12 +148,31 @@ export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
         <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
           相性 × デッキパワーで環境を読むための自分専用マトリクス。データはこの端末のブラウザ（localStorage）に自動保存されます。
         </p>
-        <button
-          onClick={() => setCreating(true)}
-          className="mt-6 rounded-lg bg-gold px-5 py-2.5 text-sm font-bold text-abyss shadow-lg shadow-gold/20 transition hover:-translate-y-0.5 hover:bg-gold-bright"
-        >
-          ＋ 新規テーブル
-        </button>
+        <div className="mt-6 flex items-center gap-2.5">
+          <button
+            onClick={() => setCreating(true)}
+            className="rounded-lg bg-gold px-5 py-2.5 text-sm font-bold text-abyss shadow-lg shadow-gold/20 transition hover:-translate-y-0.5 hover:bg-gold-bright"
+          >
+            ＋ 新規テーブル
+          </button>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="rounded-lg border border-line px-4 py-2.5 text-sm text-muted transition hover:border-muted hover:text-fg"
+          >
+            JSONインポート
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json,application/json"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) importJsonFile(file)
+              e.target.value = ''
+            }}
+          />
+        </div>
       </header>
 
       {sorted.length === 0 ? (

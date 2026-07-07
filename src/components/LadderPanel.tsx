@@ -1,13 +1,18 @@
 import { useMemo } from 'react'
-import { ladderRanking } from '../logic/matchup'
+import { buildCtx, ladderRanking } from '../logic/analysis'
+import { useStore } from '../store'
 import type { MatchupTable } from '../types'
 import { ClassDot } from './ClassDot'
+import { ScatterView, type ScatterPoint } from './ScatterView'
 
 export function LadderPanel({ table }: { table: MatchupTable }) {
+  const { setShare, resetShares } = useStore()
   const deckOf = useMemo(() => new Map(table.decks.map((d) => [d.id, d])), [table.decks])
-  const ranking = ladderRanking(table)
+  const ctx = useMemo(() => buildCtx(table), [table])
+  const ranking = useMemo(() => ladderRanking(ctx), [ctx])
+  const hasShares = table.fieldDeckIds.some((id) => (table.shares[id] ?? 0) > 0)
 
-  if (ranking.length === 0) {
+  if (table.myDeckIds.length === 0) {
     return (
       <p className="px-1 py-6 text-sm text-muted">
         「自分が使う」デッキを追加すると、対環境の期待勝率ランキングが表示されます。
@@ -15,54 +20,118 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
     )
   }
 
+  const points: ScatterPoint[] = ranking.flatMap((r) => {
+    const deck = deckOf.get(r.deckId)
+    if (!deck || r.expected === null) return []
+    return [{ deck, expected: r.expected, entered: r.entered, total: r.total }]
+  })
+
   return (
-    <div>
-      <ol className="space-y-1.5">
-        {ranking.map((row, i) => {
-          const deck = deckOf.get(row.deckId)
-          if (!deck) return null
-          const avg = row.average
-          const tone =
-            avg === null ? 'text-muted/50' : avg >= 55 ? 'text-win' : avg <= 45 ? 'text-lose' : 'text-fg'
-          return (
-            <li
-              key={row.deckId}
-              className="flex items-center gap-3 rounded-lg border border-line bg-panel-2/40 px-3 py-2"
-            >
-              <span
-                className={`w-7 text-center font-display text-lg font-bold ${
-                  i === 0 && avg !== null ? 'text-gold' : 'text-muted/60'
-                }`}
+    <div className="space-y-5">
+      <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
+        {/* 環境シェア入力 */}
+        <div>
+          <div className="mb-2 flex items-baseline justify-between">
+            <h3 className="text-sm font-semibold">環境シェア</h3>
+            {hasShares && (
+              <button
+                onClick={() => resetShares(table.id)}
+                className="text-[11px] text-muted underline transition hover:text-fg"
               >
-                {i + 1}
-              </span>
-              <ClassDot className={deck.className} />
-              <span className="min-w-0 flex-1 truncate text-sm font-medium" title={deck.name}>
-                {deck.name}
-              </span>
-              <span className="font-display text-xs font-semibold text-muted">P{deck.power}</span>
-              <div className="hidden w-32 sm:block">
-                <div className="mb-0.5 text-right text-[10px] text-muted">
-                  入力 {row.entered}/{row.total}
-                </div>
-                <div className="h-1 overflow-hidden rounded-full bg-abyss">
-                  <div
-                    className="h-full rounded-full bg-gold/70"
-                    style={{ width: `${row.total > 0 ? (row.entered / row.total) * 100 : 0}%` }}
-                  />
-                </div>
-              </div>
-              <span className={`w-20 text-right font-display text-xl font-bold ${tone}`}>
-                {avg === null ? '—' : `${avg.toFixed(1)}%`}
-              </span>
-            </li>
-          )
-        })}
-      </ol>
-      <p className="mt-3 px-1 text-[11px] leading-relaxed text-muted">
-        ※ 入力済みのセルのみを環境シェア均等で単純平均した期待勝率です。環境シェアの重み付けとデッキパワー補正は
-        v2 で対応予定。
-      </p>
+                均等に戻す
+              </button>
+            )}
+          </div>
+          {table.fieldDeckIds.length === 0 ? (
+            <p className="text-xs text-muted">「環境にいる」デッキがありません。</p>
+          ) : (
+            <ul className="space-y-2">
+              {table.fieldDeckIds.map((id) => {
+                const deck = deckOf.get(id)
+                if (!deck) return null
+                return (
+                  <li key={id} className="flex items-center gap-2">
+                    <ClassDot className={deck.className} size={7} />
+                    <span className="w-24 shrink-0 truncate text-xs" title={deck.name}>
+                      {deck.name}
+                    </span>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      value={table.shares[id] ?? 0}
+                      onChange={(e) => setShare(table.id, id, Number(e.target.value))}
+                      className="min-w-0 flex-1"
+                    />
+                    <span className="w-10 shrink-0 text-right font-display text-xs font-semibold text-muted">
+                      {Math.round((ctx.weights.get(id) ?? 0) * 100)}%
+                    </span>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+          <p className="mt-2.5 text-[11px] leading-relaxed text-muted">
+            {hasShares
+              ? 'スライダーの比率で重み付けします（右の%は正規化後の想定遭遇率）。'
+              : '未入力のため全デッキ均等扱い。1つでも動かすと入力値の比率で重み付けされます。'}
+          </p>
+        </div>
+
+        {/* ランキング */}
+        <div>
+          <h3 className="mb-2 text-sm font-semibold">期待勝率ランキング</h3>
+          <ol className="space-y-1.5">
+            {ranking.map((row, i) => {
+              const deck = deckOf.get(row.deckId)
+              if (!deck) return null
+              const v = row.expected
+              const tone =
+                v === null ? 'text-muted/50' : v >= 55 ? 'text-win' : v <= 45 ? 'text-lose' : 'text-fg'
+              return (
+                <li
+                  key={row.deckId}
+                  className="flex items-center gap-3 rounded-lg border border-line bg-panel-2/40 px-3 py-2"
+                >
+                  <span
+                    className={`w-7 text-center font-display text-lg font-bold ${
+                      i === 0 && v !== null ? 'text-gold' : 'text-muted/60'
+                    }`}
+                  >
+                    {i + 1}
+                  </span>
+                  <ClassDot className={deck.className} />
+                  <span className="min-w-0 flex-1 truncate text-sm font-medium" title={deck.name}>
+                    {deck.name}
+                  </span>
+                  <span className="font-display text-xs font-semibold text-muted">P{deck.power}</span>
+                  <div className="hidden w-28 sm:block">
+                    <div className="mb-0.5 text-right text-[10px] text-muted">
+                      入力 {row.entered}/{row.total}
+                    </div>
+                    <div className="h-1 overflow-hidden rounded-full bg-abyss">
+                      <div
+                        className="h-full rounded-full bg-gold/70"
+                        style={{ width: `${row.total > 0 ? (row.entered / row.total) * 100 : 0}%` }}
+                      />
+                    </div>
+                  </div>
+                  <span className={`w-20 text-right font-display text-xl font-bold ${tone}`}>
+                    {v === null ? '—' : `${v.toFixed(1)}%`}
+                  </span>
+                </li>
+              )
+            })}
+          </ol>
+          <p className="mt-2.5 px-1 text-[11px] leading-relaxed text-muted">
+            ※ シェア{hasShares ? '重み付け' : '均等'}・パワー補正
+            {table.powerAdjust.enabled ? `ON（係数${table.powerAdjust.coef}）` : 'OFF'}
+            。未入力セルは除外し、重みを再正規化して計算しています。
+          </p>
+        </div>
+      </div>
+
+      {points.length > 0 && <ScatterView points={points} />}
     </div>
   )
 }

@@ -51,24 +51,3 @@ export function clearCellEdit(
   return cells
 }
 
-export interface DeckRanking {
-  deckId: string
-  /** 入力済みセルの単純平均（シェア均等扱い）。未入力なら null */
-  average: number | null
-  entered: number
-  total: number
-}
-
-/** 自分の各デッキの対環境期待勝率（入力済みセルのみで平均）を勝率降順で返す */
-export function ladderRanking(table: TableSlice): DeckRanking[] {
-  const rows = table.myDeckIds.map((myId) => {
-    const values = table.fieldDeckIds
-      .map((fieldId) => table.cells[cellKey(myId, fieldId)])
-      .filter((c): c is MatchupCell => c !== undefined)
-      .map((c) => c.value)
-    const entered = values.length
-    const average = entered > 0 ? values.reduce((a, b) => a + b, 0) / entered : null
-    return { deckId: myId, average, entered, total: table.fieldDeckIds.length }
-  })
-  return rows.sort((a, b) => (b.average ?? -1) - (a.average ?? -1))
-}

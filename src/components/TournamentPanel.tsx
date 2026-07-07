@@ -1,5 +1,8 @@
+import { useMemo } from 'react'
+import { buildCtx, lineupRankingBo1, lineupRankingBo3 } from '../logic/analysis'
 import { useStore } from '../store'
 import type { MatchupTable, TournamentRule } from '../types'
+import { ClassDot } from './ClassDot'
 
 const RULES: Array<TournamentRule & { label: string; desc: string }> = [
   { deckCount: 2, matchType: 'bo1', label: '2デッキ BO1', desc: '2デッキ持ち込み・1本勝負' },
@@ -12,9 +15,26 @@ const RULES: Array<TournamentRule & { label: string; desc: string }> = [
   },
 ]
 
+const SHOW_MAX = 8
+
 export function TournamentPanel({ table }: { table: MatchupTable }) {
   const { updateTableMeta } = useStore()
   const rule = table.tournamentRule
+  const deckOf = useMemo(() => new Map(table.decks.map((d) => [d.id, d])), [table.decks])
+  const ctx = useMemo(() => buildCtx(table), [table])
+  const results = useMemo(
+    () => (rule.matchType === 'bo1' ? lineupRankingBo1(ctx, rule.deckCount) : lineupRankingBo3(ctx)),
+    [ctx, rule],
+  )
+
+  const notReady =
+    ctx.myIds.length < rule.deckCount
+      ? `「自分が使う」デッキを${rule.deckCount}個以上登録してください（現在 ${ctx.myIds.length}個）。`
+      : ctx.fieldIds.length === 0
+        ? '「環境にいる」デッキを登録すると持ち込みセットを計算できます。'
+        : rule.matchType === 'bo3' && ctx.fieldIds.length < 2
+          ? 'BO3の計算には「環境にいる」デッキが2つ以上必要です（相手も2デッキ持ち込むため）。'
+          : null
 
   return (
     <div>
@@ -43,14 +63,67 @@ export function TournamentPanel({ table }: { table: MatchupTable }) {
           )
         })}
       </div>
-      <div className="mt-3 rounded-lg border border-dashed border-line bg-panel-2/30 px-4 py-6 text-center">
-        <p className="font-display text-sm font-semibold tracking-wide text-muted">
-          最適持ち込みセット計算 — v2 で実装予定
-        </p>
-        <p className="mx-auto mt-1.5 max-w-lg text-[12px] leading-relaxed text-muted/80">
-          相性値と環境シェアから、選択中の大会形式で期待勝率が最大になる持ち込みの組合せをランキング表示します（BO1
-          は相手デッキを見て最適選択できる想定、BO3 はコンクエスト式の簡易モデル）。
-        </p>
+
+      <div className="mt-4">
+        <h3 className="mb-2 text-sm font-semibold">最適持ち込みセット</h3>
+        {notReady ? (
+          <p className="rounded-lg border border-dashed border-line bg-panel-2/30 px-4 py-6 text-center text-xs text-muted">
+            {notReady}
+          </p>
+        ) : (
+          <>
+            <ol className="space-y-1.5">
+              {results.slice(0, SHOW_MAX).map((r, i) => (
+                <li
+                  key={r.deckIds.join(':')}
+                  className="flex items-center gap-3 rounded-lg border border-line bg-panel-2/40 px-3 py-2"
+                >
+                  <span
+                    className={`w-7 text-center font-display text-lg font-bold ${
+                      i === 0 ? 'text-gold' : 'text-muted/60'
+                    }`}
+                  >
+                    {i + 1}
+                  </span>
+                  <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1">
+                    {r.deckIds.map((id) => {
+                      const deck = deckOf.get(id)
+                      if (!deck) return null
+                      return (
+                        <span key={id} className="flex items-center gap-1.5 text-sm font-medium">
+                          <ClassDot className={deck.className} size={7} />
+                          <span className="max-w-36 truncate" title={deck.name}>
+                            {deck.name}
+                          </span>
+                        </span>
+                      )
+                    })}
+                    {r.assumed > 0 && (
+                      <span className="text-[10px] text-gold/80">未入力{r.assumed}セルを50%扱い</span>
+                    )}
+                  </div>
+                  <span
+                    className={`w-20 shrink-0 text-right font-display text-xl font-bold ${
+                      r.expected >= 55 ? 'text-win' : r.expected <= 45 ? 'text-lose' : 'text-fg'
+                    }`}
+                  >
+                    {r.expected.toFixed(1)}%
+                  </span>
+                </li>
+              ))}
+            </ol>
+            {results.length > SHOW_MAX && (
+              <p className="mt-1.5 px-1 text-[11px] text-muted">他 {results.length - SHOW_MAX} 通り</p>
+            )}
+            <p className="mt-2.5 px-1 text-[11px] leading-relaxed text-muted">
+              {rule.matchType === 'bo1'
+                ? '※ 各ラウンド、相手のデッキが分かってから持ち込み内の最適なデッキを出せる想定の楽観値です（実際は同時選択のためやや上振れします）。'
+                : '※ BO3はコンクエスト式（勝利デッキ再使用不可）のマッチ勝率。相手の出し方はランダム・自分は最適選択の簡易モデルで、相手の持ち込みペアは環境シェアの積で重み付けしています。'}
+              シェア{ctx.fieldIds.some((id) => (table.shares[id] ?? 0) > 0) ? '重み付け' : '均等'}
+              ・パワー補正{table.powerAdjust.enabled ? `ON（係数${table.powerAdjust.coef}）` : 'OFF'}。
+            </p>
+          </>
+        )}
       </div>
     </div>
   )

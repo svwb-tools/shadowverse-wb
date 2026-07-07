@@ -34,6 +34,13 @@ export interface TournamentRule {
   matchType: 'bo1' | 'bo3'
 }
 
+/** デッキパワー補正: 補正値 = 相性値 + coef × (自パワー − 相手パワー) */
+export interface PowerAdjust {
+  enabled: boolean
+  /** パワー差1あたりの勝率補正%（0〜10） */
+  coef: number
+}
+
 export interface MatchupTable {
   id: string
   name: string
@@ -50,5 +57,6 @@ export interface MatchupTable {
   defaultTab: TabKind
   tournamentRule: TournamentRule
   inputScale: 'five' | 'percent'
+  powerAdjust: PowerAdjust
   updatedAt: string
 }

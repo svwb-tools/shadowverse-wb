@@ -1,7 +1,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { applyCellEdit, clearCellEdit } from './logic/matchup'
-import type { Deck, MatchupTable, TabKind, TournamentRule } from './types'
+import type { Deck, MatchupTable, PowerAdjust, TabKind, TournamentRule } from './types'
+
+const DEFAULT_POWER_ADJUST: PowerAdjust = { enabled: false, coef: 2 }
 
 export interface DeckRoles {
   my: boolean
@@ -29,6 +31,11 @@ interface AppStore {
   removeDeck: (tableId: string, deckId: string) => void
   setCell: (tableId: string, myDeckId: string, fieldDeckId: string, value: number) => void
   clearCell: (tableId: string, myDeckId: string, fieldDeckId: string) => void
+  setShare: (tableId: string, fieldDeckId: string, value: number) => void
+  resetShares: (tableId: string) => void
+  setPowerAdjust: (tableId: string, patch: Partial<PowerAdjust>) => void
+  /** 共有・インポートされたテーブルを新しいIDでコピーとして追加する */
+  importTable: (table: MatchupTable) => string
 }
 
 const withRole = (ids: string[], id: string, enabled: boolean) => {
@@ -67,6 +74,7 @@ export const useStore = create<AppStore>()(
             defaultTab: input.defaultTab,
             tournamentRule: input.tournamentRule,
             inputScale: 'percent',
+            powerAdjust: { ...DEFAULT_POWER_ADJUST },
             updatedAt: new Date().toISOString(),
           }
           set((state) => ({ tables: { ...state.tables, [id]: table } }))
@@ -137,8 +145,40 @@ export const useStore = create<AppStore>()(
             ...t,
             cells: clearCellEdit(t, myDeckId, fieldDeckId),
           })),
+
+        setShare: (tableId, fieldDeckId, value) =>
+          mutate(tableId, (t) => ({
+            ...t,
+            shares: { ...t.shares, [fieldDeckId]: Math.min(100, Math.max(0, value)) },
+          })),
+
+        resetShares: (tableId) => mutate(tableId, (t) => ({ ...t, shares: {} })),
+
+        setPowerAdjust: (tableId, patch) =>
+          mutate(tableId, (t) => ({ ...t, powerAdjust: { ...t.powerAdjust, ...patch } })),
+
+        importTable: (table) => {
+          const id = crypto.randomUUID()
+          set((state) => ({
+            tables: {
+              ...state.tables,
+              [id]: { ...table, id, updatedAt: new Date().toISOString() },
+            },
+          }))
+          return id
+        },
       }
     },
-    { name: 'svwb-matchup-v1' },
+    {
+      name: 'svwb-matchup-v1',
+      version: 2,
+      migrate: (persisted) => {
+        const state = persisted as { tables?: Record<string, MatchupTable> }
+        for (const table of Object.values(state?.tables ?? {})) {
+          table.powerAdjust ??= { ...DEFAULT_POWER_ADJUST }
+        }
+        return state as { tables: Record<string, MatchupTable> }
+      },
+    },
   ),
 )

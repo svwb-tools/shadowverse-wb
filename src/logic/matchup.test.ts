@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { applyCellEdit, cellKey, clearCellEdit, ladderRanking } from './matchup'
+import { applyCellEdit, cellKey, clearCellEdit } from './matchup'
 import type { MatchupCell } from '../types'
 
 // A, B は自分も相手も使うデッキ、C は相手しか使わないデッキ
@@ -62,21 +62,5 @@ describe('clearCellEdit', () => {
     const after = clearCellEdit(base(withManualMirror), 'A', 'B')
     expect(after[cellKey('A', 'B')]).toBeUndefined()
     expect(after[cellKey('B', 'A')]).toEqual({ value: 60, source: 'manual' })
-  })
-})
-
-describe('ladderRanking', () => {
-  it('入力済みセルだけで平均し、勝率降順に並べる', () => {
-    let cells: Record<string, MatchupCell> = {}
-    cells = applyCellEdit(base(cells), 'A', 'C', 40)
-    cells = applyCellEdit(base(cells), 'B', 'A', 70) // B→A 70（ミラー A→B auto 30 も入る）
-    const ranking = ladderRanking(base(cells))
-    expect(ranking[0]).toMatchObject({ deckId: 'B', average: 70, entered: 1, total: 3 })
-    expect(ranking[1]).toMatchObject({ deckId: 'A', average: 35, entered: 2, total: 3 }) // (40+30)/2
-  })
-
-  it('未入力のデッキは null で最後に置く', () => {
-    const ranking = ladderRanking(base())
-    expect(ranking.every((r) => r.average === null)).toBe(true)
   })
 })
