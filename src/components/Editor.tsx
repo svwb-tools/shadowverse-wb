@@ -94,26 +94,6 @@ export function Editor({ tableId, onBack }: { tableId: string; onBack: () => voi
             onChange={(e) => updateTableMeta(table.id, { name: e.target.value })}
             className="min-w-32 flex-1 border-b border-transparent bg-transparent font-display text-lg font-semibold tracking-wide focus:border-gold focus:outline-none"
           />
-          <div className="flex shrink-0 overflow-hidden rounded-md border border-line text-xs">
-            {(
-              [
-                { key: 'percent', label: '%' },
-                { key: 'five', label: '5段階' },
-              ] as const
-            ).map((s) => (
-              <button
-                key={s.key}
-                onClick={() => updateTableMeta(table.id, { inputScale: s.key })}
-                className={`px-3 py-1.5 transition ${
-                  table.inputScale === s.key
-                    ? 'bg-gold font-bold text-abyss'
-                    : 'text-muted hover:text-fg'
-                }`}
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
           <div className="flex shrink-0 gap-1.5 text-xs">
             <button
               onClick={exportPng}

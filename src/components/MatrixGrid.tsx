@@ -92,7 +92,7 @@ export function MatrixGrid({
   table: MatchupTable
   exportRef?: Ref<HTMLTableElement>
 }) {
-  const { setPowerAdjust } = useStore()
+  const { setPowerAdjust, updateTableMeta } = useStore()
   const [editing, setEditing] = useState<EditingPos | null>(null)
   const [showHelp, setShowHelp] = useState(false)
   // 行・列の並びはデッキ管理の並び順に従う
@@ -122,6 +122,26 @@ export function MatrixGrid({
   return (
     <div>
       <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 px-1 text-xs text-muted">
+        <div className="flex shrink-0 overflow-hidden rounded-md border border-line">
+          {(
+            [
+              { key: 'percent', label: '%' },
+              { key: 'five', label: '5段階' },
+            ] as const
+          ).map((s) => (
+            <button
+              key={s.key}
+              onClick={() => updateTableMeta(table.id, { inputScale: s.key })}
+              className={`px-3 py-1 transition ${
+                table.inputScale === s.key
+                  ? 'bg-gold font-bold text-abyss'
+                  : 'text-muted hover:text-fg'
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
         <label className="flex cursor-pointer items-center gap-1.5">
           <input
             type="checkbox"
