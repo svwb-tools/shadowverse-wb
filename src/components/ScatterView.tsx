@@ -7,6 +7,8 @@ export interface ScatterPoint {
   expected: number
   entered: number
   total: number
+  /** 自分が使わないデッキ: 自分のデッキ群への勝率からの逆算値 */
+  estimated?: boolean
 }
 
 const W = 640
@@ -38,9 +40,21 @@ export function ScatterView({ points }: { points: ScatterPoint[] }) {
   return (
     <div className="rounded-lg border border-line bg-panel-2/30 p-3">
       <h3 className="mb-1 px-1 text-sm font-semibold">2軸ビュー（対環境期待勝率 × デッキパワー）</h3>
-      <p className="mb-2 px-1 text-[11px] text-muted">
-        右下に落ちるデッキは「相性は良いがパワー不足」の相性番長候補です。
-      </p>
+      <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-[11px] text-muted">
+        <span>右下に落ちるデッキは「相性は良いがパワー不足」の相性番長候補です。</span>
+        <span className="flex items-center gap-1.5">
+          <svg width="12" height="12" viewBox="0 0 12 12">
+            <circle cx="6" cy="6" r="5" fill="#8e97ad" />
+          </svg>
+          自分が使うデッキ
+        </span>
+        <span className="flex items-center gap-1.5">
+          <svg width="12" height="12" viewBox="0 0 12 12">
+            <circle cx="6" cy="6" r="4.5" fill="#8e97ad" fillOpacity="0.25" stroke="#8e97ad" strokeWidth="1.5" strokeDasharray="2.5 2" />
+          </svg>
+          環境のみのデッキ（自分のデッキへの勝率から逆算）
+        </span>
+      </div>
       <div className="relative">
         <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label="期待勝率とパワーの散布図">
           {/* グリッド */}
@@ -106,10 +120,18 @@ export function ScatterView({ points }: { points: ScatterPoint[] }) {
                 className="cursor-pointer"
               >
                 <circle cx={sx(p.expected)} cy={sy(p.deck.power)} r={12} fill="transparent" />
-                <circle
-                  cx={sx(p.expected)} cy={sy(p.deck.power)} r={7}
-                  fill={CLASS_COLORS[p.deck.className]} stroke="#121a2b" strokeWidth={2}
-                />
+                {p.estimated ? (
+                  <circle
+                    cx={sx(p.expected)} cy={sy(p.deck.power)} r={6.5}
+                    fill={CLASS_COLORS[p.deck.className]} fillOpacity={0.22}
+                    stroke={CLASS_COLORS[p.deck.className]} strokeWidth={1.5} strokeDasharray="3 2.5"
+                  />
+                ) : (
+                  <circle
+                    cx={sx(p.expected)} cy={sy(p.deck.power)} r={7}
+                    fill={CLASS_COLORS[p.deck.className]} stroke="#121a2b" strokeWidth={2}
+                  />
+                )}
                 <text
                   x={sx(p.expected) + (labelLeft ? -11 : 11)} y={sy(p.deck.power) + 4}
                   textAnchor={labelLeft ? 'end' : 'start'} fontSize={11} fill="#e9e7de"
@@ -131,7 +153,8 @@ export function ScatterView({ points }: { points: ScatterPoint[] }) {
           >
             <div className="font-semibold">{hover.deck.name}</div>
             <div className="mt-0.5 text-muted">
-              期待勝率 <span className="font-display font-semibold text-fg">{hover.expected.toFixed(1)}%</span>
+              {hover.estimated ? '対自分デッキ勝率（逆算）' : '期待勝率'}{' '}
+              <span className="font-display font-semibold text-fg">{hover.expected.toFixed(1)}%</span>
               ・パワー {hover.deck.power}・入力 {hover.entered}/{hover.total}
             </div>
           </div>

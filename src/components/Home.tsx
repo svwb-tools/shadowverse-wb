@@ -148,7 +148,7 @@ export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
   const importJsonFile = async (file: File) => {
     const table = parseTableJson(await file.text())
     if (!table) {
-      alert('JSONを読み込めませんでした。このアプリからエクスポートしたファイルか確認してください。')
+      alert('データを読み込めませんでした。このアプリの「データ保存」で作ったファイルか確認してください。')
       return
     }
     onOpen(importTable(table))
@@ -176,7 +176,7 @@ export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
             onClick={() => fileInputRef.current?.click()}
             className="rounded-lg border border-line px-4 py-2.5 text-sm text-muted transition hover:border-muted hover:text-fg"
           >
-            JSONインポート
+            データ読み込み
           </button>
           <input
             ref={fileInputRef}

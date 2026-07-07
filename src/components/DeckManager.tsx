@@ -89,7 +89,14 @@ function DeckForm({
   )
 }
 
-function DeckRow({ table, deck }: { table: MatchupTable; deck: Deck }) {
+interface DragHandlers {
+  isDragging: boolean
+  onDragStart: () => void
+  onDragEnter: () => void
+  onDragEnd: () => void
+}
+
+function DeckRow({ table, deck, drag }: { table: MatchupTable; deck: Deck; drag: DragHandlers }) {
   const { updateDeck, setDeckRoles, removeDeck } = useStore()
   const [editing, setEditing] = useState(false)
   const roles = {
@@ -114,7 +121,19 @@ function DeckRow({ table, deck }: { table: MatchupTable; deck: Deck }) {
   }
 
   return (
-    <li className="group rounded-lg border border-line bg-panel-2/40 px-2.5 py-2 transition hover:border-line/80 hover:bg-panel-2/70">
+    <li
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.effectAllowed = 'move'
+        drag.onDragStart()
+      }}
+      onDragEnter={drag.onDragEnter}
+      onDragOver={(e) => e.preventDefault()}
+      onDragEnd={drag.onDragEnd}
+      className={`group cursor-grab rounded-lg border border-line bg-panel-2/40 px-2.5 py-2 transition hover:border-line/80 hover:bg-panel-2/70 active:cursor-grabbing ${
+        drag.isDragging ? 'opacity-40' : ''
+      }`}
+    >
       <div className="flex items-center gap-2">
         <ClassDot className={deck.className} />
         <span className="min-w-0 flex-1 truncate text-sm font-medium" title={deck.name}>
@@ -163,8 +182,17 @@ function DeckRow({ table, deck }: { table: MatchupTable; deck: Deck }) {
 }
 
 export function DeckManager({ table }: { table: MatchupTable }) {
-  const { addDeck } = useStore()
+  const { addDeck, setDeckOrder } = useStore()
   const [addRoles, setAddRoles] = useState({ my: false, field: true })
+  const [draggingId, setDraggingId] = useState<string | null>(null)
+
+  const moveDraggingBefore = (targetId: string) => {
+    if (!draggingId || draggingId === targetId) return
+    const ids = table.decks.map((d) => d.id)
+    ids.splice(ids.indexOf(draggingId), 1)
+    ids.splice(ids.indexOf(targetId), 0, draggingId)
+    setDeckOrder(table.id, ids)
+  }
 
   return (
     <div className="rounded-xl border border-line bg-panel p-3.5">
@@ -200,11 +228,26 @@ export function DeckManager({ table }: { table: MatchupTable }) {
       </div>
 
       {table.decks.length > 0 && (
-        <ul className="mt-3.5 max-h-[52vh] space-y-1.5 overflow-y-auto border-t border-line pt-3">
-          {table.decks.map((deck) => (
-            <DeckRow key={deck.id} table={table} deck={deck} />
-          ))}
-        </ul>
+        <>
+          <ul className="mt-3.5 max-h-[52vh] space-y-1.5 overflow-y-auto border-t border-line pt-3">
+            {table.decks.map((deck) => (
+              <DeckRow
+                key={deck.id}
+                table={table}
+                deck={deck}
+                drag={{
+                  isDragging: draggingId === deck.id,
+                  onDragStart: () => setDraggingId(deck.id),
+                  onDragEnter: () => moveDraggingBefore(deck.id),
+                  onDragEnd: () => setDraggingId(null),
+                }}
+              />
+            ))}
+          </ul>
+          <p className="mt-2 text-[11px] text-muted/80">
+            ドラッグで並べ替え（マトリクスの行・列にも反映されます）
+          </p>
+        </>
       )}
     </div>
   )

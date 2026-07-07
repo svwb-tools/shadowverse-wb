@@ -1,4 +1,4 @@
-import { useMemo, useState, type Ref } from 'react'
+import { useState, type Ref } from 'react'
 import { FIVE_STEPS, fiveLabel, winTone } from '../constants'
 import { cellKey } from '../logic/matchup'
 import { useStore } from '../store'
@@ -95,9 +95,9 @@ export function MatrixGrid({
   const { setPowerAdjust } = useStore()
   const [editing, setEditing] = useState<EditingPos | null>(null)
   const [showHelp, setShowHelp] = useState(false)
-  const deckOf = useMemo(() => new Map(table.decks.map((d) => [d.id, d])), [table.decks])
-  const myDecks = table.myDeckIds.map((id) => deckOf.get(id)).filter((d): d is Deck => !!d)
-  const fieldDecks = table.fieldDeckIds.map((id) => deckOf.get(id)).filter((d): d is Deck => !!d)
+  // 行・列の並びはデッキ管理の並び順に従う
+  const myDecks = table.decks.filter((d) => table.myDeckIds.includes(d.id))
+  const fieldDecks = table.decks.filter((d) => table.fieldDeckIds.includes(d.id))
 
   const adjust = table.powerAdjust
   // 表示用のパワー補正値。編集は常に生値に対して行う

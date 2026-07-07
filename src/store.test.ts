@@ -61,6 +61,21 @@ describe('store', () => {
     expect(s().tableOrder).not.toContain(tableId)
   })
 
+  it('setDeckOrder でデッキの並び順を差し替えられる', () => {
+    const s = () => useStore.getState()
+    const tableId = s().createTable({
+      name: '並べ替え',
+      defaultTab: 'ladder',
+      tournamentRule: { deckCount: 2, matchType: 'bo1' },
+    })
+    s().addDeck(tableId, { name: 'A', className: 'エルフ', power: 5 }, { my: true, field: true })
+    s().addDeck(tableId, { name: 'B', className: 'ロイヤル', power: 5 }, { my: true, field: true })
+    const [a, b] = s().tables[tableId]!.decks.map((d) => d.id)
+    s().setDeckOrder(tableId, [b, a])
+    expect(s().tables[tableId]!.decks.map((d) => d.name)).toEqual(['B', 'A'])
+    s().deleteTable(tableId)
+  })
+
   it('setTableOrder で並び順を差し替えられる', () => {
     const s = () => useStore.getState()
     const make = (name: string) =>

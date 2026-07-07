@@ -20,10 +20,30 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
     )
   }
 
-  const points: ScatterPoint[] = ranking.flatMap((r) => {
-    const deck = deckOf.get(r.deckId)
-    if (!deck || r.expected === null) return []
-    return [{ deck, expected: r.expected, entered: r.entered, total: r.total }]
+  // 散布図: 自分が使うデッキは期待勝率、環境のみのデッキは自分のデッキへの勝率から逆算
+  const points: ScatterPoint[] = table.decks.flatMap((deck) => {
+    if (table.myDeckIds.includes(deck.id)) {
+      const row = ranking.find((r) => r.deckId === deck.id)
+      if (!row || row.expected === null) return []
+      return [{ deck, expected: row.expected, entered: row.entered, total: row.total }]
+    }
+    if (table.fieldDeckIds.includes(deck.id)) {
+      const values = table.myDeckIds
+        .map((myId) => ctx.value(myId, deck.id))
+        .filter((v): v is number => v !== null)
+      if (values.length === 0) return []
+      const expected = 100 - values.reduce((a, b) => a + b, 0) / values.length
+      return [
+        {
+          deck,
+          expected,
+          entered: values.length,
+          total: table.myDeckIds.length,
+          estimated: true,
+        },
+      ]
+    }
+    return []
   })
 
   return (
@@ -46,11 +66,10 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
             <p className="text-xs text-muted">「環境にいる」デッキがありません。</p>
           ) : (
             <ul className="space-y-2">
-              {table.fieldDeckIds.map((id) => {
-                const deck = deckOf.get(id)
-                if (!deck) return null
-                return (
-                  <li key={id} className="flex items-center gap-2">
+              {table.decks
+                .filter((d) => table.fieldDeckIds.includes(d.id))
+                .map((deck) => (
+                  <li key={deck.id} className="flex items-center gap-2">
                     <ClassDot className={deck.className} size={7} />
                     <span className="w-24 shrink-0 truncate text-xs" title={deck.name}>
                       {deck.name}
@@ -59,16 +78,15 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
                       type="range"
                       min={0}
                       max={100}
-                      value={table.shares[id] ?? 0}
-                      onChange={(e) => setShare(table.id, id, Number(e.target.value))}
+                      value={table.shares[deck.id] ?? 0}
+                      onChange={(e) => setShare(table.id, deck.id, Number(e.target.value))}
                       className="min-w-0 flex-1"
                     />
                     <span className="w-10 shrink-0 text-right font-display text-xs font-semibold text-muted">
-                      {Math.round((ctx.weights.get(id) ?? 0) * 100)}%
+                      {Math.round((ctx.weights.get(deck.id) ?? 0) * 100)}%
                     </span>
                   </li>
-                )
-              })}
+                ))}
             </ul>
           )}
           <p className="mt-2.5 text-[11px] leading-relaxed text-muted">

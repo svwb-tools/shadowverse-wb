@@ -30,6 +30,8 @@ interface AppStore {
   updateTableMeta: (tableId: string, patch: TableMetaPatch) => void
   addDeck: (tableId: string, deck: Omit<Deck, 'id'>, roles: DeckRoles) => void
   updateDeck: (tableId: string, deck: Deck) => void
+  /** デッキの表示順を差し替える（マトリクスの行・列にも反映） */
+  setDeckOrder: (tableId: string, deckIds: string[]) => void
   setDeckRoles: (tableId: string, deckId: string, roles: DeckRoles) => void
   removeDeck: (tableId: string, deckId: string) => void
   setCell: (tableId: string, myDeckId: string, fieldDeckId: string, value: number) => void
@@ -115,6 +117,17 @@ export const useStore = create<AppStore>()(
             ...t,
             decks: t.decks.map((d) => (d.id === deck.id ? deck : d)),
           })),
+
+        setDeckOrder: (tableId, deckIds) =>
+          mutate(tableId, (t) => {
+            const pos = new Map(deckIds.map((id, i) => [id, i]))
+            return {
+              ...t,
+              decks: [...t.decks].sort(
+                (a, b) => (pos.get(a.id) ?? t.decks.length) - (pos.get(b.id) ?? t.decks.length),
+              ),
+            }
+          }),
 
         // 行・列からの出し入れのみ。セルの入力値は保持し、再チェックで復元できるようにする
         setDeckRoles: (tableId, deckId, roles) =>

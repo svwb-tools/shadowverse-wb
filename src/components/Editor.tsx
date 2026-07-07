@@ -73,7 +73,7 @@ export function Editor({ tableId, onBack }: { tableId: string; onBack: () => voi
     const url = URL.createObjectURL(blob)
     download(url, `${table.name || '相性表'}.json`)
     URL.revokeObjectURL(url)
-    showToast('JSONを保存しました')
+    showToast('データファイルを保存しました')
   }
 
   return (
@@ -128,7 +128,7 @@ export function Editor({ tableId, onBack }: { tableId: string; onBack: () => voi
               onClick={exportJson}
               className="rounded-md border border-line px-2.5 py-1.5 text-muted transition hover:border-muted hover:text-fg"
             >
-              JSON
+              データ保存
             </button>
           </div>
           <span className="hidden shrink-0 text-[10px] tracking-wider text-muted/70 sm:inline">
@@ -149,8 +149,8 @@ export function Editor({ tableId, onBack }: { tableId: string; onBack: () => voi
             <nav className="mb-3 flex gap-1 border-b border-line">
               {(
                 [
-                  { key: 'ladder', label: 'ランクマ集計' },
-                  { key: 'tournament', label: '大会集計' },
+                  { key: 'ladder', label: 'ランクマ用' },
+                  { key: 'tournament', label: '大会用' },
                 ] as const
               ).map((t) => (
                 <button
