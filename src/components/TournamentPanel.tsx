@@ -118,8 +118,8 @@ export function TournamentPanel({ table }: { table: MatchupTable }) {
             <p className="mt-3 px-1 text-[11px] leading-relaxed text-muted">
               {rule.matchType === 'bo1'
                 ? '※ 各ラウンド、相手のデッキが分かってから持ち込み内の最適なデッキを出せる想定の楽観値です（実際は同時選択のためやや上振れします）。'
-                : '※ BO3はコンクエスト式（勝利デッキ再使用不可）のマッチ勝率。相手の出し方はランダム・自分は最適選択の簡易モデルで、相手の持ち込みペアは環境シェアの積で重み付けしています。'}
-              シェア{ctx.fieldIds.some((id) => (table.shares[id] ?? 0) > 0) ? '重み付け' : '均等'}
+                : '※ BO3はコンクエスト式（勝利デッキ再使用不可）のマッチ勝率。相手の出し方はランダム・自分は最適選択の簡易モデルで、相手の持ち込みペアは遭遇率のかけ合わせで重み付けしています。'}
+              遭遇率{ctx.fieldIds.some((id) => (table.shares[id] ?? 0) > 0) ? 'で重み付け' : 'は均等扱い'}
               ・デッキパワー補正{table.powerAdjust.enabled ? `ON（係数${table.powerAdjust.coef}）` : 'OFF'}。
             </p>
           </>

@@ -49,10 +49,10 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
   return (
     <div className="space-y-6">
       <div className="grid gap-8 lg:grid-cols-[300px_1fr]">
-        {/* 環境シェア入力 */}
+        {/* デッキ遭遇率の入力 */}
         <div>
-          <div className="mb-3 flex items-baseline justify-between">
-            <h3 className="text-sm font-semibold tracking-wide">環境シェア</h3>
+          <div className="mb-1.5 flex items-baseline justify-between">
+            <h3 className="text-sm font-semibold tracking-wide">デッキの遭遇率</h3>
             {hasShares && (
               <button
                 onClick={() => resetShares(table.id)}
@@ -62,6 +62,9 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
               </button>
             )}
           </div>
+          <p className="mb-3 text-[11px] leading-relaxed text-muted">
+            それぞれのデッキとどれくらい当たりそうか、の見込みです。この比率を重みにして期待勝率を計算します。
+          </p>
           {table.fieldDeckIds.length === 0 ? (
             <p className="text-xs text-muted">「環境にいる」デッキがありません。</p>
           ) : (
@@ -91,8 +94,8 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
           )}
           <p className="mt-3 text-[11px] leading-relaxed text-muted">
             {hasShares
-              ? 'スライダーの比率で重み付けします（右の%は正規化後の想定遭遇率）。'
-              : '未入力のため全デッキ均等扱い。1つでも動かすと入力値の比率で重み付けされます。'}
+              ? '右の%は、合計が100%になるように換算した想定遭遇率です。'
+              : '未設定のため、いまは全デッキと同じ割合で当たる前提で計算しています。よく当たるデッキのスライダーを大きくしてください。'}
           </p>
         </div>
 
@@ -142,7 +145,7 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
             })}
           </ol>
           <p className="mt-3 px-1 text-[11px] leading-relaxed text-muted">
-            ※ シェア{hasShares ? '重み付け' : '均等'}・デッキパワー補正
+            ※ 遭遇率{hasShares ? 'で重み付け' : 'は均等扱い'}・デッキパワー補正
             {table.powerAdjust.enabled ? `ON（係数${table.powerAdjust.coef}）` : 'OFF'}
             。未入力セルは除外し、重みを再正規化して計算しています。
           </p>

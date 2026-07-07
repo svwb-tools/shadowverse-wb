@@ -52,7 +52,7 @@ export interface MatchupTable {
   fieldDeckIds: string[]
   /** キー: `${myDeckId}:${fieldDeckId}` */
   cells: Record<string, MatchupCell>
-  /** fieldDeckId → 環境シェア%（v2で使用） */
+  /** fieldDeckId → 想定遭遇率（相対値。正規化して重みに使う） */
   shares: Record<string, number>
   defaultTab: TabKind
   tournamentRule: TournamentRule
