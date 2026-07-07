@@ -44,7 +44,7 @@ export function ScatterView({ points }: { points: ScatterPoint[] }) {
       <p className="px-1 text-[11px] leading-relaxed text-muted">
         右下に落ちるデッキは「相性は良いがパワー不足」の相性番長候補です。
       </p>
-      <div className="mb-3 mt-1.5 flex flex-wrap items-center gap-x-5 gap-y-1 px-1 text-[11px] text-muted">
+      <div className="mb-3 mt-3 flex flex-col gap-y-1.5 px-1 text-[11px] text-muted">
         <span className="flex items-center gap-1.5">
           <svg width="12" height="12" viewBox="0 0 12 12">
             <circle cx="6" cy="6" r="5" style={{ fill: 'var(--ink-muted)' }} />
