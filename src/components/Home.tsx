@@ -103,8 +103,7 @@ export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
     <div className="mx-auto max-w-5xl px-5 pb-16">
       <header className="pb-10 pt-14">
         <div className="flex items-start justify-between gap-3">
-          <p className="flex items-center gap-2 font-display text-sm font-bold tracking-[0.35em] text-fg">
-            <span className="inline-block h-2 w-2 rotate-45 bg-gold" />
+          <p className="font-display text-lg font-bold tracking-[0.12em] text-fg">
             SHADOWVERSE: WORLDS BEYOND
           </p>
           <ThemeToggle />
