@@ -27,8 +27,15 @@ export function decodeTableFromHash(hash: string): MatchupTable | null {
   return parseTableJson(json)
 }
 
+/** 外部入力の上限（悪意ある共有データによる保存領域圧迫・フリーズ対策） */
+export const MAX_PAYLOAD_CHARS = 5_000_000
+const MAX_NAME_CHARS = 100
+const MAX_DECKS = 100
+const MAX_ID_CHARS = 64
+
 /** 共有ペイロード（{v, table}）と素のテーブルJSONの両方を受け付ける */
 export function parseTableJson(json: string): MatchupTable | null {
+  if (json.length > MAX_PAYLOAD_CHARS) return null
   try {
     const data: unknown = JSON.parse(json)
     const t =
@@ -50,10 +57,13 @@ export function normalizeTable(t: unknown): MatchupTable | null {
 
   const decks: Deck[] = []
   for (const d of t.decks) {
+    if (decks.length >= MAX_DECKS) break
     if (!isRecord(d) || typeof d.id !== 'string' || typeof d.name !== 'string') continue
+    // ':' はセルのキー区切りに使うためIDに含めない。空・過長も拒否
+    if (d.id.length === 0 || d.id.length > MAX_ID_CHARS || d.id.includes(':')) continue
     decks.push({
       id: d.id,
-      name: d.name,
+      name: d.name.slice(0, MAX_NAME_CHARS),
       className: CLASS_NAMES.includes(d.className as ClassName)
         ? (d.className as ClassName)
         : 'エルフ',
@@ -101,8 +111,8 @@ export function normalizeTable(t: unknown): MatchupTable | null {
   const blend = isRecord(t.recordBlend) ? t.recordBlend : {}
 
   return {
-    id: typeof t.id === 'string' ? t.id : '',
-    name: t.name,
+    id: typeof t.id === 'string' ? t.id.slice(0, MAX_ID_CHARS) : '',
+    name: t.name.slice(0, MAX_NAME_CHARS),
     decks,
     myDeckIds: idList(t.myDeckIds),
     fieldDeckIds: idList(t.fieldDeckIds),

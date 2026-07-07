@@ -91,6 +91,10 @@ export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
   }
 
   const importJsonFile = async (file: File) => {
+    if (file.size > 5_000_000) {
+      alert('ファイルが大きすぎます。このアプリの「データ保存」で作ったファイルか確認してください。')
+      return
+    }
     const table = parseTableJson(await file.text())
     if (!table) {
       alert('データを読み込めませんでした。このアプリの「データ保存」で作ったファイルか確認してください。')
@@ -111,7 +115,7 @@ export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
         <h1 className="mt-2 font-display text-4xl font-bold tracking-wide">相性表メーカー</h1>
         <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
           相性 × デッキパワーで環境を読むための自分専用マトリクス。データはこの端末のブラウザに自動保存されます。
-          ブラウザのキャッシュやCookieを削除するとデータも消えるため、大事なデータは相性表画面の「データ保存」でファイルに保存しておいてください。
+          ブラウザのキャッシュやCookieを削除するとデータも消えるため、大事なデータは相性表画面の「データ保存」でファイルに保存してください。
         </p>
         <div className="mt-6 flex items-center gap-2.5">
           <button

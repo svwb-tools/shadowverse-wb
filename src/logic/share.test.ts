@@ -73,4 +73,26 @@ describe('parseTableJson の検証', () => {
     expect(t.powerAdjust).toEqual({ enabled: false, coef: 2 })
     expect(t.tournamentRule).toEqual({ deckCount: 2, matchType: 'bo1' })
   })
+
+  it('過大な入力を制限する（文字列長・デッキ数・ペイロードサイズ・不正なID）', () => {
+    const longName = 'あ'.repeat(10_000)
+    const t = parseTableJson(
+      JSON.stringify({
+        name: longName,
+        decks: [
+          { id: 'ok', name: longName },
+          { id: 'a:b', name: '区切り文字入りIDは拒否' },
+          { id: '', name: '空IDは拒否' },
+          ...Array.from({ length: 150 }, (_, i) => ({ id: `d${i}`, name: `deck${i}` })),
+        ],
+      }),
+    )!
+    expect(t.name).toHaveLength(100)
+    expect(t.decks[0].name).toHaveLength(100)
+    expect(t.decks.some((d) => d.id === 'a:b' || d.id === '')).toBe(false)
+    expect(t.decks.length).toBeLessThanOrEqual(100)
+
+    // 上限超過のペイロードは読み込まない
+    expect(parseTableJson('x'.repeat(5_000_001))).toBeNull()
+  })
 })
