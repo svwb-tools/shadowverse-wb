@@ -8,6 +8,7 @@ export function RecordsPanel({ table }: { table: MatchupTable }) {
   const { addGameResult, adjustRecord, resetOverlayBaseline } = useStore()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [fixMode, setFixMode] = useState(false)
+  const [showGuide, setShowGuide] = useState(false)
 
   const myDecks = table.decks.filter((d) => table.myDeckIds.includes(d.id))
   const fieldDecks = table.decks.filter((d) => table.fieldDeckIds.includes(d.id))
@@ -163,13 +164,68 @@ export function RecordsPanel({ table }: { table: MatchupTable }) {
           >
             今日の分をリセット
           </button>
+          <button
+            onClick={() => setShowGuide(true)}
+            className="rounded-md border border-line px-2.5 py-1 text-[11px] text-muted transition hover:border-muted hover:text-fg"
+          >
+            使い方
+          </button>
         </div>
         <p className="mt-2 text-[11px] leading-relaxed text-muted">
-          専用ウィンドウに「デッキごとの今日の勝敗と合計」を表示します。ここで記録するたびに自動で更新されます。
-          OBSでは「ウィンドウキャプチャ」でこのウィンドウを取り込み、フィルタの「クロマキー」（色: 緑）で背景を透過してください。
-          「今日の分」は上のリセットを押した時点からのカウントです（未リセットなら通算を表示）。
+          専用ウィンドウに「デッキごとの今日の勝敗と合計」を表示します。ここで記録するたびに自動で更新されます。OBSでの設定手順は「使い方」を見てください。
         </p>
       </div>
+
+      {showGuide && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-abyss/70 p-4 backdrop-blur-sm"
+          onClick={() => setShowGuide(false)}
+        >
+          <div
+            className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-line bg-panel p-5 shadow-2xl shadow-black/50"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="font-display text-lg font-bold tracking-wide">配信オーバーレイの使い方</h2>
+            <ol className="mt-4 list-decimal space-y-3 pl-5 text-sm leading-relaxed">
+              <li>
+                <span className="font-semibold">「配信オーバーレイを開く」</span>
+                を押して専用ウィンドウを開きます。配信中はこのウィンドウを開いたままにしてください（最小化すると取り込めないことがあります）。
+              </li>
+              <li>
+                配信を始めるタイミングで
+                <span className="font-semibold">「今日の分をリセット」</span>
+                を押します。以降に記録した勝敗だけがオーバーレイに表示されます（通算の記録は消えません）。
+              </li>
+              <li>
+                OBSの「ソース」で
+                <span className="font-semibold">「ウィンドウキャプチャ」</span>
+                を追加し、オーバーレイのウィンドウ（タイトル「配信オーバーレイ - 相性表名」）を選択します。
+              </li>
+              <li>
+                追加したソースを右クリック →「フィルタ」→ 効果フィルタに
+                <span className="font-semibold">「クロマキー」</span>
+                を追加します（色の種類: 緑）。緑の背景が消えて文字だけが残ります。文字の縁に緑が残る場合は「類似性」「滑らかさ」を少し調整してください。
+              </li>
+              <li>
+                ソースを<span className="font-semibold">Alt（Macは⌥）+ドラッグでクロップ</span>
+                すると、映す範囲を行単位で選べます（例: TOTAL行だけ表示）。あとは好きな位置・サイズに配置して完成です。
+              </li>
+            </ol>
+            <p className="mt-4 rounded-lg border border-line bg-panel-2 px-3 py-2 text-[11px] leading-relaxed text-muted">
+              うまく映らないとき: Windows +
+              Chromeでキャプチャが真っ黒になる場合は、Chromeの設定で「ハードウェアアクセラレーション」をOFFにするか、「画面キャプチャ」で代用してください。
+            </p>
+            <div className="mt-5 flex justify-end">
+              <button
+                onClick={() => setShowGuide(false)}
+                className="rounded-md bg-gold px-4 py-2 text-sm font-bold text-abyss transition hover:bg-gold-bright"
+              >
+                閉じる
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
