@@ -14,11 +14,14 @@ function DeckForm({
   submitLabel,
   onSubmit,
   onCancel,
+  beforeSubmit,
 }: {
   initial: DeckFormValue
   submitLabel: string
   onSubmit: (value: DeckFormValue) => void
   onCancel?: () => void
+  /** 送信ボタンの直前に差し込む追加項目（役割チェックボックスなど） */
+  beforeSubmit?: React.ReactNode
 }) {
   const [value, setValue] = useState(initial)
   const canSubmit = value.name.trim().length > 0
@@ -55,9 +58,9 @@ function DeckForm({
       </div>
       <div>
         <div className="flex flex-wrap items-baseline gap-x-1.5">
-          <span className="text-xs font-medium">パワー</span>
+          <span className="text-md font-medium">デッキパワー</span>
           <span className="text-[10px] leading-relaxed text-muted">
-            — デッキの地力の主観評価（1〜10）。デッキパワー補正と2軸ビューで使います
+            デッキパワーの主観評価（1〜10）。相性表と2軸ビューで使用します。
           </span>
         </div>
         <div className="mt-1 flex items-center gap-2.5">
@@ -74,6 +77,7 @@ function DeckForm({
           </span>
         </div>
       </div>
+      {beforeSubmit}
       <div className="flex gap-2">
         <button
           type="submit"
@@ -214,25 +218,27 @@ export function DeckManager({ table }: { table: MatchupTable }) {
         initial={{ name: '', className: 'エルフ', power: 5 }}
         submitLabel="デッキを追加"
         onSubmit={(v) => addDeck(table.id, v, addRoles)}
+        beforeSubmit={
+          <div className="flex gap-4 text-xs text-muted">
+            <label className="flex cursor-pointer items-center gap-1.5">
+              <input
+                type="checkbox"
+                checked={addRoles.my}
+                onChange={(e) => setAddRoles((r) => ({ ...r, my: e.target.checked }))}
+              />
+              自分が使う
+            </label>
+            <label className="flex cursor-pointer items-center gap-1.5">
+              <input
+                type="checkbox"
+                checked={addRoles.field}
+                onChange={(e) => setAddRoles((r) => ({ ...r, field: e.target.checked }))}
+              />
+              環境にいる
+            </label>
+          </div>
+        }
       />
-      <div className="mt-2 flex gap-4 text-xs text-muted">
-        <label className="flex cursor-pointer items-center gap-1.5">
-          <input
-            type="checkbox"
-            checked={addRoles.my}
-            onChange={(e) => setAddRoles((r) => ({ ...r, my: e.target.checked }))}
-          />
-          自分が使う
-        </label>
-        <label className="flex cursor-pointer items-center gap-1.5">
-          <input
-            type="checkbox"
-            checked={addRoles.field}
-            onChange={(e) => setAddRoles((r) => ({ ...r, field: e.target.checked }))}
-          />
-          環境にいる
-        </label>
-      </div>
 
       {table.decks.length > 0 && (
         <>
