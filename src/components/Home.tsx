@@ -30,9 +30,9 @@ function CreateDialog({
         className="w-full max-w-md rounded-2xl border border-line bg-panel p-5 shadow-2xl shadow-black/50"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="font-display text-lg font-bold tracking-wide">新規テーブル</h2>
+        <h2 className="font-display text-lg font-bold tracking-wide">新規相性表</h2>
 
-        <label className="mt-4 block text-xs text-muted">テーブル名</label>
+        <label className="mt-4 block text-xs text-muted">相性表名</label>
         <input
           autoFocus
           value={name}
@@ -118,15 +118,32 @@ function CreateDialog({
 
 export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
   const tables = useStore((s) => s.tables)
+  const tableOrder = useStore((s) => s.tableOrder)
+  const setTableOrder = useStore((s) => s.setTableOrder)
   const deleteTable = useStore((s) => s.deleteTable)
   const importTable = useStore((s) => s.importTable)
   const [creating, setCreating] = useState(false)
+  const [draggingId, setDraggingId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const sorted = useMemo(
-    () => Object.values(tables).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
-    [tables],
-  )
+  // 並び順に保存されたものを先頭に、未登録のもの（旧データ）は更新日時順で末尾に
+  const sorted = useMemo(() => {
+    const known = tableOrder.filter((id) => tables[id])
+    const knownSet = new Set(known)
+    const rest = Object.values(tables)
+      .filter((t) => !knownSet.has(t.id))
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+      .map((t) => t.id)
+    return [...known, ...rest].map((id) => tables[id])
+  }, [tables, tableOrder])
+
+  const moveDraggingBefore = (targetId: string) => {
+    if (!draggingId || draggingId === targetId) return
+    const ids = sorted.map((t) => t.id)
+    ids.splice(ids.indexOf(draggingId), 1)
+    ids.splice(ids.indexOf(targetId), 0, draggingId)
+    setTableOrder(ids)
+  }
 
   const importJsonFile = async (file: File) => {
     const table = parseTableJson(await file.text())
@@ -153,7 +170,7 @@ export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
             onClick={() => setCreating(true)}
             className="rounded-lg bg-gold px-5 py-2.5 text-sm font-bold text-abyss shadow-lg shadow-gold/20 transition hover:-translate-y-0.5 hover:bg-gold-bright"
           >
-            ＋ 新規テーブル
+            ＋ 新規相性表
           </button>
           <button
             onClick={() => fileInputRef.current?.click()}
@@ -177,12 +194,26 @@ export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
 
       {sorted.length === 0 ? (
         <div className="rounded-xl border border-dashed border-line bg-panel/50 px-6 py-16 text-center text-sm text-muted">
-          まだテーブルがありません。「新規テーブル」から最初の相性表を作りましょう。
+          まだ相性表がありません。「新規相性表」から最初の相性表を作りましょう。
         </div>
       ) : (
+        <>
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {sorted.map((t) => (
-            <li key={t.id} className="group relative">
+            <li
+              key={t.id}
+              draggable
+              onDragStart={(e) => {
+                setDraggingId(t.id)
+                e.dataTransfer.effectAllowed = 'move'
+              }}
+              onDragEnd={() => setDraggingId(null)}
+              onDragOver={(e) => e.preventDefault()}
+              onDragEnter={() => moveDraggingBefore(t.id)}
+              className={`group relative cursor-grab active:cursor-grabbing ${
+                draggingId === t.id ? 'opacity-40' : ''
+              }`}
+            >
               <button
                 onClick={() => onOpen(t.id)}
                 className="w-full rounded-xl border border-line bg-panel p-4 text-left transition hover:-translate-y-0.5 hover:border-gold/60 hover:bg-panel-2"
@@ -221,6 +252,8 @@ export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
             </li>
           ))}
         </ul>
+        <p className="mt-3 px-1 text-[11px] text-muted/80">カードはドラッグで並べ替えできます。</p>
+        </>
       )}
 
       {creating && (

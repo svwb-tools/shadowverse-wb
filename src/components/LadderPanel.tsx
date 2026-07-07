@@ -124,7 +124,7 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
             })}
           </ol>
           <p className="mt-2.5 px-1 text-[11px] leading-relaxed text-muted">
-            ※ シェア{hasShares ? '重み付け' : '均等'}・パワー補正
+            ※ シェア{hasShares ? '重み付け' : '均等'}・デッキパワー補正
             {table.powerAdjust.enabled ? `ON（係数${table.powerAdjust.coef}）` : 'OFF'}
             。未入力セルは除外し、重みを再正規化して計算しています。
           </p>

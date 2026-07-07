@@ -33,7 +33,7 @@ export function Editor({ tableId, onBack }: { tableId: string; onBack: () => voi
   if (!table) {
     return (
       <div className="p-10 text-center text-sm text-muted">
-        テーブルが見つかりません。
+        相性表が見つかりません。
         <button onClick={onBack} className="ml-2 text-gold underline">
           一覧へ戻る
         </button>

@@ -94,6 +94,7 @@ export function MatrixGrid({
 }) {
   const { setPowerAdjust } = useStore()
   const [editing, setEditing] = useState<EditingPos | null>(null)
+  const [showHelp, setShowHelp] = useState(false)
   const deckOf = useMemo(() => new Map(table.decks.map((d) => [d.id, d])), [table.decks])
   const myDecks = table.myDeckIds.map((id) => deckOf.get(id)).filter((d): d is Deck => !!d)
   const fieldDecks = table.fieldDeckIds.map((id) => deckOf.get(id)).filter((d): d is Deck => !!d)
@@ -127,8 +128,19 @@ export function MatrixGrid({
             checked={adjust.enabled}
             onChange={(e) => setPowerAdjust(table.id, { enabled: e.target.checked })}
           />
-          パワー補正（表示と集計に反映）
+          デッキパワー補正（表示と集計に反映）
         </label>
+        <button
+          onClick={() => setShowHelp((v) => !v)}
+          title="デッキパワー補正とは"
+          className={`flex h-4.5 w-4.5 items-center justify-center rounded-full border text-[10px] font-bold transition ${
+            showHelp
+              ? 'border-gold bg-gold/15 text-gold-bright'
+              : 'border-line text-muted hover:border-muted hover:text-fg'
+          }`}
+        >
+          ?
+        </button>
         {adjust.enabled && (
           <label className="flex items-center gap-1.5">
             係数
@@ -145,10 +157,30 @@ export function MatrixGrid({
               }
               className="w-14 rounded border border-line bg-abyss/60 px-1.5 py-0.5 text-center font-display text-fg focus:border-gold focus:outline-none"
             />
-            %／パワー差1（セル編集は常に生値）
+            %／パワー差1
           </label>
         )}
       </div>
+      {showHelp && (
+        <div className="mb-2.5 rounded-lg border border-gold/30 bg-panel-2/50 px-3.5 py-3 text-xs leading-relaxed text-muted">
+          <p className="font-semibold text-fg">デッキパワー補正とは</p>
+          <p className="mt-1">
+            相性表の上では有利でも、デッキの地力（パワー）が足りず勝ち切れないことがあります。
+            この補正をONにすると、デッキ登録時に付けたパワー値の差を勝率に反映した
+            <span className="font-semibold text-fg">「デッキパワー補正値」</span>
+            でマトリクスと集計（ランクマ・大会）を表示します。
+          </p>
+          <p className="mt-1.5 rounded bg-abyss/50 px-2 py-1 font-display tracking-wide text-fg">
+            補正値 = 相性値 + 係数 × (自分のパワー − 相手のパワー)
+          </p>
+          <p className="mt-1.5">
+            例: 係数2のとき、自分のデッキがパワー8・相手がパワー5なら、相性値60%は
+            <span className="font-semibold text-fg"> 66%</span>
+            に補正されます（逆にパワーが低い側は下がります）。
+            セルの編集はいつでも補正前の生値に対して行われ、元の入力値は変わりません。
+          </p>
+        </div>
+      )}
       <div className="max-h-[62vh] overflow-auto rounded-xl border border-line bg-panel">
         <table ref={exportRef} className="w-max min-w-full border-collapse bg-panel">
           <thead>
@@ -258,7 +290,9 @@ export function MatrixGrid({
         </span>
         <span>セルをクリックして入力（空にすると削除）</span>
         <span>薄い数字 = ミラーからの自動入力。手入力すると上書きされなくなります</span>
-        {adjust.enabled && <span className="text-gold/80">パワー補正値を表示中（編集は生値）</span>}
+        {adjust.enabled && (
+          <span className="text-gold/80">デッキパワー補正値を表示中（編集は生値）</span>
+        )}
       </div>
     </div>
   )

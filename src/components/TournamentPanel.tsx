@@ -120,7 +120,7 @@ export function TournamentPanel({ table }: { table: MatchupTable }) {
                 ? '※ 各ラウンド、相手のデッキが分かってから持ち込み内の最適なデッキを出せる想定の楽観値です（実際は同時選択のためやや上振れします）。'
                 : '※ BO3はコンクエスト式（勝利デッキ再使用不可）のマッチ勝率。相手の出し方はランダム・自分は最適選択の簡易モデルで、相手の持ち込みペアは環境シェアの積で重み付けしています。'}
               シェア{ctx.fieldIds.some((id) => (table.shares[id] ?? 0) > 0) ? '重み付け' : '均等'}
-              ・パワー補正{table.powerAdjust.enabled ? `ON（係数${table.powerAdjust.coef}）` : 'OFF'}。
+              ・デッキパワー補正{table.powerAdjust.enabled ? `ON（係数${table.powerAdjust.coef}）` : 'OFF'}。
             </p>
           </>
         )}

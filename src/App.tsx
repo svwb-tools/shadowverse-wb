@@ -30,9 +30,9 @@ export default function App() {
       {shared && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-abyss/70 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-2xl border border-line bg-panel p-5 shadow-2xl shadow-black/50">
-            <h2 className="font-display text-lg font-bold tracking-wide">共有テーブルを開く</h2>
+            <h2 className="font-display text-lg font-bold tracking-wide">共有された相性表を開く</h2>
             <p className="mt-3 text-sm leading-relaxed text-muted">
-              共有されたテーブル
+              共有された相性表
               <span className="mx-1 font-semibold text-fg">「{shared.name}」</span>
               （デッキ{shared.decks.length}個・入力{Object.keys(shared.cells).length}セル）
               を自分のコピーとして追加しますか？

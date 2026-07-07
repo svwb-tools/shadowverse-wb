@@ -22,6 +22,9 @@ type TableMetaPatch = Partial<
 
 interface AppStore {
   tables: Record<string, MatchupTable>
+  /** ホーム画面での表示順（先頭が最初）。含まれないIDは更新日時順で末尾に並ぶ */
+  tableOrder: string[]
+  setTableOrder: (ids: string[]) => void
   createTable: (input: CreateTableInput) => string
   deleteTable: (tableId: string) => void
   updateTableMeta: (tableId: string, patch: TableMetaPatch) => void
@@ -34,7 +37,7 @@ interface AppStore {
   setShare: (tableId: string, fieldDeckId: string, value: number) => void
   resetShares: (tableId: string) => void
   setPowerAdjust: (tableId: string, patch: Partial<PowerAdjust>) => void
-  /** 共有・インポートされたテーブルを新しいIDでコピーとして追加する */
+  /** 共有・インポートされた相性表を新しいIDでコピーとして追加する */
   importTable: (table: MatchupTable) => string
 }
 
@@ -60,12 +63,15 @@ export const useStore = create<AppStore>()(
 
       return {
         tables: {},
+        tableOrder: [],
+
+        setTableOrder: (ids) => set({ tableOrder: ids }),
 
         createTable: (input) => {
           const id = crypto.randomUUID()
           const table: MatchupTable = {
             id,
-            name: input.name.trim() || '新しいテーブル',
+            name: input.name.trim() || '新しい相性表',
             decks: [],
             myDeckIds: [],
             fieldDeckIds: [],
@@ -77,7 +83,10 @@ export const useStore = create<AppStore>()(
             powerAdjust: { ...DEFAULT_POWER_ADJUST },
             updatedAt: new Date().toISOString(),
           }
-          set((state) => ({ tables: { ...state.tables, [id]: table } }))
+          set((state) => ({
+            tables: { ...state.tables, [id]: table },
+            tableOrder: [id, ...state.tableOrder],
+          }))
           return id
         },
 
@@ -85,7 +94,7 @@ export const useStore = create<AppStore>()(
           set((state) => {
             const tables = { ...state.tables }
             delete tables[tableId]
-            return { tables }
+            return { tables, tableOrder: state.tableOrder.filter((id) => id !== tableId) }
           }),
 
         updateTableMeta: (tableId, patch) => mutate(tableId, (t) => ({ ...t, ...patch })),
@@ -164,6 +173,7 @@ export const useStore = create<AppStore>()(
               ...state.tables,
               [id]: { ...table, id, updatedAt: new Date().toISOString() },
             },
+            tableOrder: [id, ...state.tableOrder],
           }))
           return id
         },

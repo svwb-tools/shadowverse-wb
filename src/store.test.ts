@@ -22,6 +22,7 @@ describe('store', () => {
       tournamentRule: { deckCount: 2, matchType: 'bo1' },
     })
     expect(s().tables[tableId]?.name).toBe('テスト環境')
+    expect(s().tableOrder[0]).toBe(tableId) // 新規作成は並び順の先頭に入る
 
     s().addDeck(tableId, { name: 'ドラゴン', className: 'ドラゴン', power: 8 }, { my: true, field: true })
     s().addDeck(tableId, { name: 'エルフ', className: 'エルフ', power: 6 }, { my: true, field: true })
@@ -57,5 +58,19 @@ describe('store', () => {
 
     s().deleteTable(tableId)
     expect(s().tables[tableId]).toBeUndefined()
+    expect(s().tableOrder).not.toContain(tableId)
+  })
+
+  it('setTableOrder で並び順を差し替えられる', () => {
+    const s = () => useStore.getState()
+    const make = (name: string) =>
+      s().createTable({ name, defaultTab: 'ladder', tournamentRule: { deckCount: 2, matchType: 'bo1' } })
+    const a = make('A')
+    const b = make('B')
+    expect(s().tableOrder.slice(0, 2)).toEqual([b, a]) // 新しい方が先頭
+    s().setTableOrder([a, b])
+    expect(s().tableOrder).toEqual([a, b])
+    s().deleteTable(a)
+    s().deleteTable(b)
   })
 })
