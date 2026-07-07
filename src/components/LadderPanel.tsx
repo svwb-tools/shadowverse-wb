@@ -51,9 +51,13 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
       <div className="grid gap-8 lg:grid-cols-[300px_1fr]">
         {/* デッキ遭遇率の入力 */}
         <div>
-          <div className="mb-1.5 flex items-center justify-between gap-3">
-            <h3 className="text-sm font-semibold tracking-wide">デッキの遭遇率</h3>
-            <span className="flex gap-1.5">
+          <div className="mb-3">
+          <h3 className="mb-1.5 text-sm font-semibold tracking-wide">デッキの遭遇率</h3>
+          <p className="text-[11px] leading-relaxed text-muted">
+            それぞれのデッキとどれくらい当たりそうか、の見込みです。この比率を重みにして期待勝率を計算します。
+          </p>
+          {(Object.keys(table.records).length > 0 || hasShares) && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
               {Object.keys(table.records).length > 0 && (
                 <button
                   onClick={() => {
@@ -62,7 +66,7 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
                     }
                   }}
                   title="対戦記録で実際に当たった回数の比率でスライダーを設定します"
-                  className="rounded-md border border-line px-2.5 py-1 text-[11px] text-muted transition hover:border-muted hover:text-fg"
+                  className="whitespace-nowrap rounded-md border border-line px-2.5 py-1 text-[11px] text-muted transition hover:border-muted hover:text-fg"
                 >
                   対戦記録から設定
                 </button>
@@ -71,16 +75,14 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
                 <button
                   onClick={() => resetShares(table.id)}
                   title="すべてのスライダーを未設定（全デッキ均等）に戻します"
-                  className="rounded-md border border-line px-2.5 py-1 text-[11px] text-muted transition hover:border-muted hover:text-fg"
+                  className="whitespace-nowrap rounded-md border border-line px-2.5 py-1 text-[11px] text-muted transition hover:border-muted hover:text-fg"
                 >
                   均等に戻す
                 </button>
               )}
-            </span>
+            </div>
+          )}
           </div>
-          <p className="mb-3 text-[11px] leading-relaxed text-muted">
-            それぞれのデッキとどれくらい当たりそうか、の見込みです。この比率を重みにして期待勝率を計算します。
-          </p>
           {table.fieldDeckIds.length === 0 ? (
             <p className="text-xs text-muted">「環境にいる」デッキがありません。</p>
           ) : (
