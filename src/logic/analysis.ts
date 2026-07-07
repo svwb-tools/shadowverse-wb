@@ -3,29 +3,62 @@ import type { MatchupTable } from '../types'
 
 type TableSlice = Pick<
   MatchupTable,
-  'decks' | 'myDeckIds' | 'fieldDeckIds' | 'cells' | 'shares' | 'powerAdjust'
+  'decks' | 'myDeckIds' | 'fieldDeckIds' | 'cells' | 'shares' | 'powerAdjust' | 'records' | 'recordBlend'
 >
+
+export interface CellEstimate {
+  /** 実績ブレンド＋パワー補正込みの推定値。データなしは null */
+  value: number | null
+  /** 主観未入力で、対戦記録だけから推定した値かどうか */
+  recordOnly: boolean
+}
+
+/**
+ * セルの推定相性値。実績ブレンド（主観を priorGames 戦分として実績と加重平均）を
+ * 適用した後、デッキパワー補正を掛ける。主観未入力のセルは50%を起点に実績から推定する。
+ */
+export function cellEstimate(
+  table: TableSlice,
+  powerOf: Map<string, number>,
+  myDeckId: string,
+  fieldDeckId: string,
+): CellEstimate {
+  const key = cellKey(myDeckId, fieldDeckId)
+  const cell = table.cells[key]
+  const record = table.records[key]
+  const games = record ? record.wins + record.losses : 0
+
+  let base: number | null = cell?.value ?? null
+  let recordOnly = false
+  if (table.recordBlend.enabled && record && games > 0) {
+    const prior = base ?? 50
+    recordOnly = base === null
+    const { priorGames } = table.recordBlend
+    base = (priorGames * prior + record.wins * 100) / (priorGames + games)
+  }
+  if (base === null) return { value: null, recordOnly: false }
+
+  if (table.powerAdjust.enabled) {
+    const diff = (powerOf.get(myDeckId) ?? 5) - (powerOf.get(fieldDeckId) ?? 5)
+    base += table.powerAdjust.coef * diff
+  }
+  return { value: Math.min(100, Math.max(0, base)), recordOnly }
+}
 
 export interface AnalysisCtx {
   myIds: string[]
   fieldIds: string[]
   /** fieldId → 正規化済みシェア。シェアが1つも入力されていなければ均等 */
   weights: Map<string, number>
-  /** パワー補正込みのセル値。未入力は null */
+  /** 実績ブレンド＋パワー補正込みのセル値。データなしは null */
   value: (myDeckId: string, fieldDeckId: string) => number | null
 }
 
 export function buildCtx(table: TableSlice): AnalysisCtx {
   const powerOf = new Map(table.decks.map((d) => [d.id, d.power]))
-  const { enabled, coef } = table.powerAdjust
 
-  const value = (myDeckId: string, fieldDeckId: string): number | null => {
-    const cell = table.cells[cellKey(myDeckId, fieldDeckId)]
-    if (!cell) return null
-    if (!enabled) return cell.value
-    const diff = (powerOf.get(myDeckId) ?? 5) - (powerOf.get(fieldDeckId) ?? 5)
-    return Math.min(100, Math.max(0, cell.value + coef * diff))
-  }
+  const value = (myDeckId: string, fieldDeckId: string): number | null =>
+    cellEstimate(table, powerOf, myDeckId, fieldDeckId).value
 
   const raw = table.fieldDeckIds.map((id) => Math.max(0, table.shares[id] ?? 0))
   const total = raw.reduce((a, b) => a + b, 0)

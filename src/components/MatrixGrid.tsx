@@ -1,5 +1,6 @@
-import { useState, type Ref } from 'react'
+import { useMemo, useState, type Ref } from 'react'
 import { FIVE_STEPS, fiveLabel, winTone } from '../constants'
+import { cellEstimate } from '../logic/analysis'
 import { cellKey } from '../logic/matchup'
 import { useStore } from '../store'
 import type { Deck, MatchupTable } from '../types'
@@ -92,21 +93,17 @@ export function MatrixGrid({
   table: MatchupTable
   exportRef?: Ref<HTMLTableElement>
 }) {
-  const { setPowerAdjust, updateTableMeta } = useStore()
+  const { setPowerAdjust, setRecordBlend, updateTableMeta } = useStore()
   const [editing, setEditing] = useState<EditingPos | null>(null)
   const [showHelp, setShowHelp] = useState(false)
+  const [showBlendHelp, setShowBlendHelp] = useState(false)
   // 行・列の並びはデッキ管理の並び順に従う
   const myDecks = table.decks.filter((d) => table.myDeckIds.includes(d.id))
   const fieldDecks = table.decks.filter((d) => table.fieldDeckIds.includes(d.id))
 
   const adjust = table.powerAdjust
-  // 表示用のパワー補正値。編集は常に生値に対して行う
-  const displayValue = (raw: number, myDeck: Deck, fieldDeck: Deck) =>
-    adjust.enabled
-      ? Math.round(
-          Math.min(100, Math.max(0, raw + adjust.coef * (myDeck.power - fieldDeck.power))),
-        )
-      : raw
+  const blend = table.recordBlend
+  const powerOf = useMemo(() => new Map(table.decks.map((d) => [d.id, d.power])), [table.decks])
 
   if (myDecks.length === 0 || fieldDecks.length === 0) {
     return (
@@ -180,6 +177,44 @@ export function MatrixGrid({
             %／パワー差1
           </label>
         )}
+        <label className="flex cursor-pointer items-center gap-1.5">
+          <input
+            type="checkbox"
+            checked={blend.enabled}
+            onChange={(e) => setRecordBlend(table.id, { enabled: e.target.checked })}
+          />
+          実績ブレンド（対戦記録を反映）
+        </label>
+        <button
+          onClick={() => setShowBlendHelp((v) => !v)}
+          title="実績ブレンドとは"
+          className={`flex h-4.5 w-4.5 items-center justify-center rounded-full border text-[10px] font-bold transition ${
+            showBlendHelp
+              ? 'border-gold bg-gold/15 text-gold-bright'
+              : 'border-line text-muted hover:border-muted hover:text-fg'
+          }`}
+        >
+          ?
+        </button>
+        {blend.enabled && (
+          <label className="flex items-center gap-1.5">
+            主観の重み
+            <input
+              type="number"
+              min={1}
+              max={50}
+              step={1}
+              value={blend.priorGames}
+              onChange={(e) =>
+                setRecordBlend(table.id, {
+                  priorGames: Math.min(50, Math.max(1, Math.round(Number(e.target.value) || 1))),
+                })
+              }
+              className="w-14 rounded border border-line bg-abyss px-1.5 py-0.5 text-center font-display text-fg focus:border-gold focus:outline-none"
+            />
+            戦分
+          </label>
+        )}
       </div>
       {showHelp && (
         <div className="mb-3 rounded-lg border border-gold/30 bg-panel-2 p-4 text-xs leading-relaxed text-muted">
@@ -198,6 +233,25 @@ export function MatrixGrid({
             <span className="font-semibold text-fg"> 66%</span>
             に補正されます（逆にパワーが低い側は下がります）。
             セルの編集はいつでも補正前の生値に対して行われ、元の入力値は変わりません。
+          </p>
+        </div>
+      )}
+      {showBlendHelp && (
+        <div className="mb-3 rounded-lg border border-gold/30 bg-panel-2 p-4 text-xs leading-relaxed text-muted">
+          <p className="font-semibold text-fg">実績ブレンドとは</p>
+          <p className="mt-1">
+            「対戦記録」タブで記録した勝敗を、相性値に自動で混ぜる機能です。
+            主観の入力値を「主観の重み」戦分の実績とみなして加重平均するため、
+            対戦数が少ないうちは主観寄り、対戦数が増えるほど実績寄りの値になります。
+          </p>
+          <p className="mt-1.5 rounded bg-abyss px-2 py-1 font-display tracking-wide text-fg">
+            ブレンド値 = (重み × 主観値 + 勝利数 × 100) ÷ (重み + 対戦数)
+          </p>
+          <p className="mt-1.5">
+            例: 重み10・主観60%のセルで20戦14勝（70%）なら、(10×60 + 14×100) ÷ 30 ≒
+            <span className="font-semibold text-fg"> 67%</span> になります。
+            主観が未入力で記録だけあるセルは、五分（50%）を出発点に推定します。
+            セルの編集はいつでもブレンド前の主観値に対して行われます。
           </p>
         </div>
       )}
@@ -228,6 +282,9 @@ export function MatrixGrid({
                 </th>
                 {fieldDecks.map((fieldDeck) => {
                   const cell = table.cells[cellKey(myDeck.id, fieldDeck.id)]
+                  const record = table.records[cellKey(myDeck.id, fieldDeck.id)]
+                  const est = cellEstimate(table, powerOf, myDeck.id, fieldDeck.id)
+                  const shown = est.value === null ? null : Math.round(est.value)
                   const isEditing =
                     editing?.myDeckId === myDeck.id && editing?.fieldDeckId === fieldDeck.id
                   const isMirror = myDeck.id === fieldDeck.id
@@ -258,32 +315,39 @@ export function MatrixGrid({
                           title={`${myDeck.name} vs ${fieldDeck.name}`}
                           className="relative flex h-9 w-full min-w-20 items-center justify-center font-display text-[15px] font-semibold transition hover:ring-1 hover:ring-inset hover:ring-gold/70"
                           style={
-                            cell
-                              ? {
-                                  backgroundColor: winTone(
-                                    displayValue(cell.value, myDeck, fieldDeck),
-                                  ),
-                                }
-                              : undefined
+                            shown !== null ? { backgroundColor: winTone(shown) } : undefined
                           }
                         >
-                          {cell ? (
-                            <span className={cell.source === 'auto' ? 'opacity-55' : ''}>
+                          {shown !== null ? (
+                            <span
+                              className={
+                                cell?.source === 'auto' || est.recordOnly ? 'opacity-55' : ''
+                              }
+                            >
                               {table.inputScale === 'five' ? (
-                                <span className="text-[13px]">
-                                  {fiveLabel(displayValue(cell.value, myDeck, fieldDeck))}
-                                </span>
+                                <span className="text-[13px]">{fiveLabel(shown)}</span>
                               ) : (
-                                displayValue(cell.value, myDeck, fieldDeck)
+                                shown
                               )}
                             </span>
                           ) : (
                             <span className="text-muted/40">—</span>
                           )}
-                          {cell?.source === 'auto' && (
+                          {record && (
+                            <span className="absolute bottom-0.5 left-1 font-display text-[8px] tracking-wider text-fg/45">
+                              {record.wins}-{record.losses}
+                            </span>
+                          )}
+                          {cell?.source === 'auto' ? (
                             <span className="absolute bottom-0.5 right-1 font-display text-[8px] tracking-widest text-fg/35">
                               AUTO
                             </span>
+                          ) : (
+                            est.recordOnly && (
+                              <span className="absolute bottom-0.5 right-1 text-[8px] tracking-wider text-fg/45">
+                                実績
+                              </span>
+                            )
                           )}
                         </button>
                       )}
@@ -310,6 +374,9 @@ export function MatrixGrid({
         </span>
         <span>セルをクリックして入力（空にすると削除）</span>
         <span>薄い数字 = ミラーからの自動入力。手入力すると上書きされなくなります</span>
+        {blend.enabled && Object.keys(table.records).length > 0 && (
+          <span>左下の小さな数字 = 対戦記録（勝-敗）。「実績」= 記録だけからの推定値</span>
+        )}
         {adjust.enabled && (
           <span className="text-gold/80">デッキパワー補正値を表示中（編集は生値）</span>
         )}

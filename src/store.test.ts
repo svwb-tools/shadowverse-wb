@@ -76,6 +76,36 @@ describe('store', () => {
     s().deleteTable(tableId)
   })
 
+  it('対戦記録の加算・修正と、実績からの遭遇率設定が動く', () => {
+    const s = () => useStore.getState()
+    const tableId = s().createTable({
+      name: '記録',
+      defaultTab: 'ladder',
+      tournamentRule: { deckCount: 2, matchType: 'bo1' },
+    })
+    s().addDeck(tableId, { name: 'A', className: 'エルフ', power: 5 }, { my: true, field: false })
+    s().addDeck(tableId, { name: 'X', className: 'ロイヤル', power: 5 }, { my: false, field: true })
+    s().addDeck(tableId, { name: 'Y', className: 'ウィッチ', power: 5 }, { my: false, field: true })
+    const [a, x, y] = s().tables[tableId]!.decks.map((d) => d.id)
+
+    s().addGameResult(tableId, a, x, true)
+    s().addGameResult(tableId, a, x, true)
+    s().addGameResult(tableId, a, x, false)
+    s().addGameResult(tableId, a, y, true)
+    expect(s().tables[tableId]!.records[`${a}:${x}`]).toEqual({ wins: 2, losses: 1 })
+
+    // 修正は0未満にならず、0勝0敗になったらキーごと消える
+    s().adjustRecord(tableId, a, y, -1, -5)
+    expect(s().tables[tableId]!.records[`${a}:${y}`]).toBeUndefined()
+
+    // X と3戦・Y と0戦 → シェアは X:100, Y:0
+    s().applySharesFromRecords(tableId)
+    expect(s().tables[tableId]!.shares[x]).toBe(100)
+    expect(s().tables[tableId]!.shares[y]).toBe(0)
+
+    s().deleteTable(tableId)
+  })
+
   it('setTableOrder で並び順を差し替えられる', () => {
     const s = () => useStore.getState()
     const make = (name: string) =>

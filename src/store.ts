@@ -1,9 +1,17 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { applyCellEdit, clearCellEdit } from './logic/matchup'
-import type { Deck, MatchupTable, PowerAdjust, TabKind, TournamentRule } from './types'
+import { applyCellEdit, cellKey, clearCellEdit } from './logic/matchup'
+import type {
+  Deck,
+  MatchupTable,
+  PowerAdjust,
+  RecordBlend,
+  TabKind,
+  TournamentRule,
+} from './types'
 
 const DEFAULT_POWER_ADJUST: PowerAdjust = { enabled: false, coef: 2 }
+const DEFAULT_RECORD_BLEND: RecordBlend = { enabled: true, priorGames: 10 }
 
 export interface DeckRoles {
   my: boolean
@@ -39,6 +47,19 @@ interface AppStore {
   setShare: (tableId: string, fieldDeckId: string, value: number) => void
   resetShares: (tableId: string) => void
   setPowerAdjust: (tableId: string, patch: Partial<PowerAdjust>) => void
+  setRecordBlend: (tableId: string, patch: Partial<RecordBlend>) => void
+  /** 対戦結果を1件記録する（通算勝敗カウントに加算） */
+  addGameResult: (tableId: string, myDeckId: string, fieldDeckId: string, win: boolean) => void
+  /** 誤入力の修正。勝敗数に差分を加える（0未満にはならない） */
+  adjustRecord: (
+    tableId: string,
+    myDeckId: string,
+    fieldDeckId: string,
+    dWins: number,
+    dLosses: number,
+  ) => void
+  /** 対戦記録の遭遇回数の比率で遭遇率スライダーを設定する */
+  applySharesFromRecords: (tableId: string) => void
   /** 共有・インポートされた相性表を新しいIDでコピーとして追加する */
   importTable: (table: MatchupTable) => string
 }
@@ -79,6 +100,8 @@ export const useStore = create<AppStore>()(
             fieldDeckIds: [],
             cells: {},
             shares: {},
+            records: {},
+            recordBlend: { ...DEFAULT_RECORD_BLEND },
             defaultTab: input.defaultTab,
             tournamentRule: input.tournamentRule,
             inputScale: 'percent',
@@ -141,17 +164,20 @@ export const useStore = create<AppStore>()(
           mutate(tableId, (t) => {
             const shares = { ...t.shares }
             delete shares[deckId]
+            const dropKeysOf = <V,>(map: Record<string, V>) =>
+              Object.fromEntries(
+                Object.entries(map).filter(([key]) => {
+                  const [a, b] = key.split(':')
+                  return a !== deckId && b !== deckId
+                }),
+              )
             return {
               ...t,
               decks: t.decks.filter((d) => d.id !== deckId),
               myDeckIds: t.myDeckIds.filter((id) => id !== deckId),
               fieldDeckIds: t.fieldDeckIds.filter((id) => id !== deckId),
-              cells: Object.fromEntries(
-                Object.entries(t.cells).filter(([key]) => {
-                  const [a, b] = key.split(':')
-                  return a !== deckId && b !== deckId
-                }),
-              ),
+              cells: dropKeysOf(t.cells),
+              records: dropKeysOf(t.records),
               shares,
             }
           }),
@@ -179,6 +205,56 @@ export const useStore = create<AppStore>()(
         setPowerAdjust: (tableId, patch) =>
           mutate(tableId, (t) => ({ ...t, powerAdjust: { ...t.powerAdjust, ...patch } })),
 
+        setRecordBlend: (tableId, patch) =>
+          mutate(tableId, (t) => ({ ...t, recordBlend: { ...t.recordBlend, ...patch } })),
+
+        addGameResult: (tableId, myDeckId, fieldDeckId, win) =>
+          mutate(tableId, (t) => {
+            const key = cellKey(myDeckId, fieldDeckId)
+            const current = t.records[key] ?? { wins: 0, losses: 0 }
+            return {
+              ...t,
+              records: {
+                ...t.records,
+                [key]: {
+                  wins: current.wins + (win ? 1 : 0),
+                  losses: current.losses + (win ? 0 : 1),
+                },
+              },
+            }
+          }),
+
+        adjustRecord: (tableId, myDeckId, fieldDeckId, dWins, dLosses) =>
+          mutate(tableId, (t) => {
+            const key = cellKey(myDeckId, fieldDeckId)
+            const current = t.records[key] ?? { wins: 0, losses: 0 }
+            const next = {
+              wins: Math.max(0, current.wins + dWins),
+              losses: Math.max(0, current.losses + dLosses),
+            }
+            const records = { ...t.records }
+            if (next.wins === 0 && next.losses === 0) delete records[key]
+            else records[key] = next
+            return { ...t, records }
+          }),
+
+        applySharesFromRecords: (tableId) =>
+          mutate(tableId, (t) => {
+            const counts = new Map<string, number>()
+            for (const [key, rec] of Object.entries(t.records)) {
+              const fieldDeckId = key.split(':')[1]
+              if (!t.fieldDeckIds.includes(fieldDeckId)) continue
+              counts.set(fieldDeckId, (counts.get(fieldDeckId) ?? 0) + rec.wins + rec.losses)
+            }
+            const total = [...counts.values()].reduce((a, b) => a + b, 0)
+            if (total === 0) return t
+            const shares: MatchupTable['shares'] = {}
+            for (const id of t.fieldDeckIds) {
+              shares[id] = Math.round(((counts.get(id) ?? 0) / total) * 100)
+            }
+            return { ...t, shares }
+          }),
+
         importTable: (table) => {
           const id = crypto.randomUUID()
           set((state) => ({
@@ -194,11 +270,13 @@ export const useStore = create<AppStore>()(
     },
     {
       name: 'svwb-matchup-v1',
-      version: 2,
+      version: 3,
       migrate: (persisted) => {
         const state = persisted as { tables?: Record<string, MatchupTable> }
         for (const table of Object.values(state?.tables ?? {})) {
           table.powerAdjust ??= { ...DEFAULT_POWER_ADJUST }
+          table.records ??= {}
+          table.recordBlend ??= { ...DEFAULT_RECORD_BLEND }
         }
         return state as { tables: Record<string, MatchupTable> }
       },

@@ -6,7 +6,7 @@ import { ClassDot } from './ClassDot'
 import { ScatterView, type ScatterPoint } from './ScatterView'
 
 export function LadderPanel({ table }: { table: MatchupTable }) {
-  const { setShare, resetShares } = useStore()
+  const { setShare, resetShares, applySharesFromRecords } = useStore()
   const deckOf = useMemo(() => new Map(table.decks.map((d) => [d.id, d])), [table.decks])
   const ctx = useMemo(() => buildCtx(table), [table])
   const ranking = useMemo(() => ladderRanking(ctx), [ctx])
@@ -51,16 +51,30 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
       <div className="grid gap-8 lg:grid-cols-[300px_1fr]">
         {/* デッキ遭遇率の入力 */}
         <div>
-          <div className="mb-1.5 flex items-baseline justify-between">
+          <div className="mb-1.5 flex items-baseline justify-between gap-3">
             <h3 className="text-sm font-semibold tracking-wide">デッキの遭遇率</h3>
-            {hasShares && (
-              <button
-                onClick={() => resetShares(table.id)}
-                className="text-[11px] text-muted underline transition hover:text-fg"
-              >
-                均等に戻す
-              </button>
-            )}
+            <span className="flex gap-3">
+              {Object.keys(table.records).length > 0 && (
+                <button
+                  onClick={() => {
+                    if (confirm('対戦記録の遭遇回数の比率で、遭遇率スライダーを上書きします。よろしいですか？')) {
+                      applySharesFromRecords(table.id)
+                    }
+                  }}
+                  className="text-[11px] text-muted underline transition hover:text-fg"
+                >
+                  実績から設定
+                </button>
+              )}
+              {hasShares && (
+                <button
+                  onClick={() => resetShares(table.id)}
+                  className="text-[11px] text-muted underline transition hover:text-fg"
+                >
+                  均等に戻す
+                </button>
+              )}
+            </span>
           </div>
           <p className="mb-3 text-[11px] leading-relaxed text-muted">
             それぞれのデッキとどれくらい当たりそうか、の見込みです。この比率を重みにして期待勝率を計算します。
@@ -147,7 +161,9 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
           <p className="mt-3 px-1 text-[11px] leading-relaxed text-muted">
             ※ 遭遇率{hasShares ? 'で重み付け' : 'は均等扱い'}・デッキパワー補正
             {table.powerAdjust.enabled ? `ON（係数${table.powerAdjust.coef}）` : 'OFF'}
-            。未入力セルは除外し、重みを再正規化して計算しています。
+            ・実績ブレンド
+            {table.recordBlend.enabled ? `ON（主観=${table.recordBlend.priorGames}戦分）` : 'OFF'}
+            。データのないセルは除外し、重みを再正規化して計算しています。
           </p>
         </div>
       </div>

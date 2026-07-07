@@ -13,6 +13,8 @@ const table: MatchupTable = {
   fieldDeckIds: ['a', 'b'],
   cells: { 'a:b': { value: 65, source: 'manual' } },
   shares: { b: 40 },
+  records: { 'a:b': { wins: 7, losses: 5 } },
+  recordBlend: { enabled: true, priorGames: 12 },
   defaultTab: 'tournament',
   tournamentRule: { deckCount: 2, matchType: 'bo3' },
   inputScale: 'five',
@@ -51,6 +53,7 @@ describe('parseTableJson の検証', () => {
       fieldDeckIds: ['a'],
       cells: { 'a:a': { value: 250 }, 'a:ghost': { value: 50 } },
       shares: { ghost: 30, a: 20 },
+      records: { 'a:a': { wins: 3, losses: -2 }, 'a:ghost': { wins: 1, losses: 1 } },
     })
     const t = parseTableJson(dirty)!
     expect(t.decks).toHaveLength(1)
@@ -59,6 +62,8 @@ describe('parseTableJson の検証', () => {
     expect(t.cells['a:a']).toMatchObject({ value: 100, source: 'manual' })
     expect(t.cells['a:ghost']).toBeUndefined()
     expect(t.shares).toEqual({ a: 20 })
+    expect(t.records).toEqual({ 'a:a': { wins: 3, losses: 0 } }) // 負値は0に、ghost参照は除去
+    expect(t.recordBlend).toEqual({ enabled: true, priorGames: 10 })
     expect(t.powerAdjust).toEqual({ enabled: false, coef: 2 })
     expect(t.tournamentRule).toEqual({ deckCount: 2, matchType: 'bo1' })
   })

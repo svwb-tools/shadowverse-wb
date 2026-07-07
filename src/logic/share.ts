@@ -76,8 +76,21 @@ export function normalizeTable(t: unknown): MatchupTable | null {
     }
   }
 
+  const records: MatchupTable['records'] = {}
+  if (isRecord(t.records)) {
+    for (const [key, rec] of Object.entries(t.records)) {
+      if (!isRecord(rec) || typeof rec.wins !== 'number' || typeof rec.losses !== 'number') continue
+      const [a, b] = key.split(':')
+      if (!deckIds.has(a) || !deckIds.has(b)) continue
+      const wins = Math.max(0, Math.round(rec.wins))
+      const losses = Math.max(0, Math.round(rec.losses))
+      if (wins + losses > 0) records[key] = { wins, losses }
+    }
+  }
+
   const rule = isRecord(t.tournamentRule) ? t.tournamentRule : {}
   const adjust = isRecord(t.powerAdjust) ? t.powerAdjust : {}
+  const blend = isRecord(t.recordBlend) ? t.recordBlend : {}
 
   return {
     id: typeof t.id === 'string' ? t.id : '',
@@ -87,6 +100,14 @@ export function normalizeTable(t: unknown): MatchupTable | null {
     fieldDeckIds: idList(t.fieldDeckIds),
     cells,
     shares,
+    records,
+    recordBlend: {
+      enabled: blend.enabled !== false,
+      priorGames:
+        typeof blend.priorGames === 'number'
+          ? Math.min(50, Math.max(1, Math.round(blend.priorGames)))
+          : 10,
+    },
     defaultTab: t.defaultTab === 'tournament' ? 'tournament' : 'ladder',
     tournamentRule: {
       deckCount: rule.deckCount === 3 ? 3 : 2,

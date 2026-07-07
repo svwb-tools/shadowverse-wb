@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildCtx,
+  cellEstimate,
   combinations,
   conquestMatchWin,
   ladderRanking,
   lineupRankingBo1,
   lineupRankingBo3,
 } from './analysis'
-import type { Deck, MatchupCell, PowerAdjust } from '../types'
+import type { Deck, MatchupCell, PowerAdjust, RecordBlend, WinLoss } from '../types'
 
 const deck = (id: string, power = 5): Deck => ({ id, name: id, className: 'エルフ', power })
 const cell = (value: number): MatchupCell => ({ value, source: 'manual' })
@@ -19,6 +20,8 @@ const makeTable = (over: {
   cells?: Record<string, MatchupCell>
   shares?: Record<string, number>
   powerAdjust?: PowerAdjust
+  records?: Record<string, WinLoss>
+  recordBlend?: RecordBlend
 }) => ({
   decks: over.decks ?? [deck('A'), deck('B'), deck('X'), deck('Y')],
   myDeckIds: over.myDeckIds ?? ['A', 'B'],
@@ -26,6 +29,8 @@ const makeTable = (over: {
   cells: over.cells ?? {},
   shares: over.shares ?? {},
   powerAdjust: over.powerAdjust ?? { enabled: false, coef: 2 },
+  records: over.records ?? {},
+  recordBlend: over.recordBlend ?? { enabled: true, priorGames: 10 },
 })
 
 describe('buildCtx', () => {
@@ -48,6 +53,51 @@ describe('buildCtx', () => {
     expect(ctx.value('A', 'X')).toBe(68) // 60 + 2×(8−4)
     expect(ctx.value('A', 'Y')).toBe(100) // 98 + 6 → クランプ
     expect(ctx.value('B', 'X')).toBeNull() // 未入力は補正しても null
+  })
+})
+
+describe('cellEstimate（実績ブレンド）', () => {
+  const powerOf = new Map<string, number>()
+
+  it('主観を priorGames 戦分として実績と加重平均する', () => {
+    const table = makeTable({
+      cells: { 'A:X': cell(60) },
+      records: { 'A:X': { wins: 14, losses: 6 } }, // 20戦14勝
+      recordBlend: { enabled: true, priorGames: 10 },
+    })
+    // (10×60 + 14×100) ÷ 30 = 66.67
+    expect(cellEstimate(table, powerOf, 'A', 'X').value).toBeCloseTo(66.67, 1)
+    expect(cellEstimate(table, powerOf, 'A', 'X').recordOnly).toBe(false)
+  })
+
+  it('主観未入力のセルは50%を起点に実績から推定し、recordOnly を立てる', () => {
+    const table = makeTable({ records: { 'A:X': { wins: 7, losses: 3 } } })
+    const est = cellEstimate(table, powerOf, 'A', 'X')
+    // (10×50 + 700) ÷ 20 = 60
+    expect(est.value).toBeCloseTo(60)
+    expect(est.recordOnly).toBe(true)
+  })
+
+  it('ブレンドOFFなら主観のみ。主観がなければ実績があっても null', () => {
+    const table = makeTable({
+      cells: { 'A:X': cell(60) },
+      records: { 'A:X': { wins: 14, losses: 6 }, 'A:Y': { wins: 9, losses: 1 } },
+      recordBlend: { enabled: false, priorGames: 10 },
+    })
+    expect(cellEstimate(table, powerOf, 'A', 'X').value).toBe(60)
+    expect(cellEstimate(table, powerOf, 'A', 'Y').value).toBeNull()
+  })
+
+  it('記録が増えるほど実績値に近づく', () => {
+    const rec = (n: number) => makeTable({
+      cells: { 'A:X': cell(40) },
+      records: { 'A:X': { wins: n, losses: 0 } },
+    })
+    const few = cellEstimate(rec(5), powerOf, 'A', 'X').value!
+    const many = cellEstimate(rec(100), powerOf, 'A', 'X').value!
+    expect(few).toBeGreaterThan(40)
+    expect(many).toBeGreaterThan(few)
+    expect(many).toBeGreaterThan(90)
   })
 })
 

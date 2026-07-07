@@ -41,6 +41,23 @@ export interface PowerAdjust {
   coef: number
 }
 
+/** 対戦記録の通算勝敗（1戦ごとの履歴は持たない） */
+export interface WinLoss {
+  wins: number
+  losses: number
+}
+
+/**
+ * 実績ブレンド: 主観値を priorGames 戦分の実績とみなし、
+ * (priorGames × 主観値 + 勝利数 × 100) ÷ (priorGames + 対戦数) を相性値として使う。
+ * 主観が未入力のセルは50%を起点に推定する。
+ */
+export interface RecordBlend {
+  enabled: boolean
+  /** 主観の重み（何戦分として扱うか、1〜50） */
+  priorGames: number
+}
+
 export interface MatchupTable {
   id: string
   name: string
@@ -54,6 +71,9 @@ export interface MatchupTable {
   cells: Record<string, MatchupCell>
   /** fieldDeckId → 想定遭遇率（相対値。正規化して重みに使う） */
   shares: Record<string, number>
+  /** キー: `${myDeckId}:${fieldDeckId}` → 通算勝敗 */
+  records: Record<string, WinLoss>
+  recordBlend: RecordBlend
   defaultTab: TabKind
   tournamentRule: TournamentRule
   inputScale: 'five' | 'percent'
