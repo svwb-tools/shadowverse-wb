@@ -94,5 +94,8 @@ describe('parseTableJson の検証', () => {
 
     // 上限超過のペイロードは読み込まない
     expect(parseTableJson('x'.repeat(5_000_001))).toBeNull()
+
+    // 解凍前の圧縮データ長も上限を超えたら解凍せずに拒否（解凍ボム対策）
+    expect(decodeTableFromHash('#d=' + 'x'.repeat(400_001))).toBeNull()
   })
 })

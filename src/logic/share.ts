@@ -19,9 +19,13 @@ export function encodeTableToHash(table: MatchupTable): string {
   )
 }
 
+/** 解凍前の圧縮データ長の上限（解凍ボムでタブを固まらせる攻撃への対策） */
+export const MAX_COMPRESSED_CHARS = 400_000
+
 export function decodeTableFromHash(hash: string): MatchupTable | null {
   const m = hash.match(/^#d=(.+)$/)
   if (!m) return null
+  if (m[1].length > MAX_COMPRESSED_CHARS) return null
   const json = decompressFromEncodedURIComponent(m[1])
   if (!json) return null
   return parseTableJson(json)
