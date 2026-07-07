@@ -33,6 +33,12 @@ describe('share round-trip', () => {
   it('JSONシリアライズから復元できる', () => {
     expect(parseTableJson(serializeTable(table))).toEqual(table)
   })
+
+  it('配信カウンタの基準点（overlayBaseline）は共有に含めない', () => {
+    const withBaseline = { ...table, overlayBaseline: { 'a:b': { wins: 3, losses: 1 } } }
+    expect(serializeTable(withBaseline)).not.toContain('overlayBaseline')
+    expect(decodeTableFromHash(encodeTableToHash(withBaseline))?.overlayBaseline).toBeUndefined()
+  })
 })
 
 describe('parseTableJson の検証', () => {

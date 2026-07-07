@@ -5,7 +5,7 @@ import type { MatchupTable } from '../types'
 import { ClassDot } from './ClassDot'
 
 export function RecordsPanel({ table }: { table: MatchupTable }) {
-  const { addGameResult, adjustRecord } = useStore()
+  const { addGameResult, adjustRecord, resetOverlayBaseline } = useStore()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [fixMode, setFixMode] = useState(false)
 
@@ -133,6 +133,43 @@ export function RecordsPanel({ table }: { table: MatchupTable }) {
           `（勝率 ${Math.round((activeTotal.wins / (activeTotal.wins + activeTotal.losses)) * 100)}%）`}
         ／ この相性表全体: {grandGames}戦。記録は通算の勝敗数だけ保存され、実績ブレンドONのとき相性値に反映されます。
       </p>
+
+      <div className="mt-5 border-t border-line pt-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="mr-1 text-sm font-semibold tracking-wide">配信者向け</h3>
+          <button
+            onClick={() =>
+              window.open(
+                `${location.origin}${location.pathname}#overlay=${table.id}`,
+                `svwb-overlay-${table.id}`,
+                'width=420,height=360,popup=yes',
+              )
+            }
+            className="rounded-md border border-line px-2.5 py-1 text-[11px] text-muted transition hover:border-muted hover:text-fg"
+          >
+            配信オーバーレイを開く
+          </button>
+          <button
+            onClick={() => {
+              if (
+                confirm(
+                  '「今日の分」の戦績カウントをリセットします（通算の記録は消えません）。よろしいですか？',
+                )
+              ) {
+                resetOverlayBaseline(table.id)
+              }
+            }}
+            className="rounded-md border border-line px-2.5 py-1 text-[11px] text-muted transition hover:border-muted hover:text-fg"
+          >
+            今日の分をリセット
+          </button>
+        </div>
+        <p className="mt-2 text-[11px] leading-relaxed text-muted">
+          専用ウィンドウに「デッキごとの今日の勝敗と合計」を表示します。ここで記録するたびに自動で更新されます。
+          OBSでは「ウィンドウキャプチャ」でこのウィンドウを取り込み、フィルタの「クロマキー」（色: 緑）で背景を透過してください。
+          「今日の分」は上のリセットを押した時点からのカウントです（未リセットなら通算を表示）。
+        </p>
+      </div>
     </div>
   )
 }

@@ -3,12 +3,20 @@ import { CLASS_NAMES, type ClassName, type Deck, type MatchupTable } from '../ty
 
 const PAYLOAD_VERSION = 1
 
+/** 端末ローカルの状態（配信カウンタの基準点）は共有・エクスポートに含めない */
+const toShareable = (table: MatchupTable): MatchupTable => {
+  const { overlayBaseline: _overlayBaseline, ...rest } = table
+  return rest
+}
+
 export function serializeTable(table: MatchupTable): string {
-  return JSON.stringify({ v: PAYLOAD_VERSION, table }, null, 2)
+  return JSON.stringify({ v: PAYLOAD_VERSION, table: toShareable(table) }, null, 2)
 }
 
 export function encodeTableToHash(table: MatchupTable): string {
-  return '#d=' + compressToEncodedURIComponent(JSON.stringify({ v: PAYLOAD_VERSION, table }))
+  return (
+    '#d=' + compressToEncodedURIComponent(JSON.stringify({ v: PAYLOAD_VERSION, table: toShareable(table) }))
+  )
 }
 
 export function decodeTableFromHash(hash: string): MatchupTable | null {

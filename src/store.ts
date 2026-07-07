@@ -60,6 +60,8 @@ interface AppStore {
   ) => void
   /** 対戦記録の遭遇回数の比率で遭遇率スライダーを設定する */
   applySharesFromRecords: (tableId: string) => void
+  /** 配信オーバーレイの「今日の分」カウントをリセット（現在の通算をスナップショット） */
+  resetOverlayBaseline: (tableId: string) => void
   /** 共有・インポートされた相性表を新しいIDでコピーとして追加する */
   importTable: (table: MatchupTable) => string
 }
@@ -237,6 +239,14 @@ export const useStore = create<AppStore>()(
             else records[key] = next
             return { ...t, records }
           }),
+
+        resetOverlayBaseline: (tableId) =>
+          mutate(tableId, (t) => ({
+            ...t,
+            overlayBaseline: Object.fromEntries(
+              Object.entries(t.records).map(([key, rec]) => [key, { ...rec }]),
+            ),
+          })),
 
         applySharesFromRecords: (tableId) =>
           mutate(tableId, (t) => {

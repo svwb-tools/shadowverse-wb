@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Editor } from './components/Editor'
 import { Home } from './components/Home'
+import { StreamOverlay } from './components/StreamOverlay'
 import { decodeTableFromHash } from './logic/share'
 import { useStore } from './store'
 import type { MatchupTable } from './types'
@@ -11,6 +12,8 @@ export default function App() {
   const importTable = useStore((s) => s.importTable)
   const [view, setView] = useState<View>({ screen: 'home' })
   const [shared, setShared] = useState<MatchupTable | null>(null)
+  // 配信オーバーレイ用の別ウィンドウ（#overlay=<tableId>）
+  const [overlayTableId] = useState(() => location.hash.match(/^#overlay=([\w-]+)$/)?.[1] ?? null)
 
   // 共有URL（#d=...）で開かれた場合、取り込み確認を出す
   useEffect(() => {
@@ -18,6 +21,10 @@ export default function App() {
     setShared(decodeTableFromHash(location.hash))
     history.replaceState(null, '', location.pathname + location.search)
   }, [])
+
+  if (overlayTableId) {
+    return <StreamOverlay tableId={overlayTableId} />
+  }
 
   return (
     <>

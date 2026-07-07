@@ -74,6 +74,11 @@ export interface MatchupTable {
   /** キー: `${myDeckId}:${fieldDeckId}` → 通算勝敗 */
   records: Record<string, WinLoss>
   recordBlend: RecordBlend
+  /**
+   * 配信オーバーレイの「今日の分」の基準点（リセット時点の records のスナップショット）。
+   * 端末ローカルの状態なので共有・エクスポートには含めない
+   */
+  overlayBaseline?: Record<string, WinLoss>
   defaultTab: TabKind
   tournamentRule: TournamentRule
   inputScale: 'five' | 'percent'
