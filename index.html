@@ -3,17 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f4f1e9" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0a0f1c" />
+    <meta name="theme-color" content="#f3f4f6" />
     <script>
-      // 描画前にテーマを決めてちらつきを防ぐ（保存された選択 > OS設定）
+      // 描画前にテーマを決めてちらつきを防ぐ（初期値はライト、ダークは選択時のみ）
       ;(function () {
         try {
           var theme = localStorage.getItem('svwb-theme')
-          if (theme !== 'light' && theme !== 'dark') {
-            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-          }
-          document.documentElement.dataset.theme = theme
+          document.documentElement.dataset.theme = theme === 'dark' ? 'dark' : 'light'
         } catch (e) {
           document.documentElement.dataset.theme = 'light'
         }
