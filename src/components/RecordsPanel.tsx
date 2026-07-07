@@ -204,7 +204,7 @@ export function RecordsPanel({ table }: { table: MatchupTable }) {
               <li>
                 追加したソースを右クリック →「フィルタ」→ 効果フィルタに
                 <span className="font-semibold">「クロマキー」</span>
-                を追加します（色の種類: 緑）。緑の背景が消えて文字だけが残ります。文字の縁に緑が残る場合は「類似性」「滑らかさ」を少し調整してください。
+                を追加します（「色キーの種類」は既定の「緑」のまま）。緑の背景が消えて文字だけが残ります。文字の縁に緑が残る場合は「類似性」「滑らかさ」を少し調整してください。
               </li>
               <li>
                 ソースを<span className="font-semibold">Alt（Macは⌥）+ドラッグでクロップ</span>
@@ -212,8 +212,10 @@ export function RecordsPanel({ table }: { table: MatchupTable }) {
               </li>
             </ol>
             <p className="mt-4 rounded-lg border border-line bg-panel-2 px-3 py-2 text-[11px] leading-relaxed text-muted">
-              うまく映らないとき: Windows +
-              Chromeでキャプチャが真っ黒になる場合は、Chromeの設定で「ハードウェアアクセラレーション」をOFFにするか、「画面キャプチャ」で代用してください。
+              うまく映らないとき（Windowsでキャプチャが真っ黒になる場合）:
+              まずウィンドウキャプチャのプロパティで「キャプチャ方法」を「自動」から「Windows
+              10」に変更してみてください。直らない場合は、Chromeの設定（システム）で「グラフィック
+              アクセラレーションが使用可能な場合は使用する」をOFFにするか、「画面キャプチャ」で代用してください。
             </p>
             <div className="mt-5 flex justify-end">
               <button
