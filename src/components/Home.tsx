@@ -2,7 +2,6 @@ import { useMemo, useRef, useState } from 'react'
 import { formatDate } from '../constants'
 import { parseTableJson } from '../logic/share'
 import { useStore } from '../store'
-import type { TabKind, TournamentRule } from '../types'
 import { ThemeToggle } from './ThemeToggle'
 
 function CreateDialog({
@@ -14,12 +13,9 @@ function CreateDialog({
 }) {
   const createTable = useStore((s) => s.createTable)
   const [name, setName] = useState('')
-  const [tab, setTab] = useState<TabKind>('ladder')
-  const [rule, setRule] = useState<TournamentRule>({ deckCount: 2, matchType: 'bo1' })
 
   const submit = () => {
-    const id = createTable({ name, defaultTab: tab, tournamentRule: rule })
-    onCreated(id)
+    onCreated(createTable({ name }))
   }
 
   return (
@@ -42,61 +38,6 @@ function CreateDialog({
           placeholder="例: 7月環境ランクマ"
           className="mt-1 w-full rounded-md border border-line bg-abyss px-3 py-2 text-sm placeholder:text-muted/60 focus:border-gold focus:outline-none"
         />
-
-        <label className="mt-4 block text-xs text-muted">主な用途（一覧のカードにラベルとして表示されます）</label>
-        <div className="mt-1 grid grid-cols-2 gap-2">
-          {(
-            [
-              { key: 'ladder', label: 'ランクマ', desc: '対環境の期待勝率を見る' },
-              { key: 'tournament', label: '大会', desc: '持ち込みセットを検討する' },
-            ] as const
-          ).map((m) => (
-            <button
-              key={m.key}
-              onClick={() => setTab(m.key)}
-              className={`rounded-lg border px-3 py-2 text-left transition ${
-                tab === m.key
-                  ? 'border-gold bg-gold/10'
-                  : 'border-line bg-panel-2 hover:border-muted/60'
-              }`}
-            >
-              <span className={`font-display text-sm font-semibold ${tab === m.key ? 'text-gold-bright' : ''}`}>
-                {m.label}
-              </span>
-              <span className="mt-0.5 block text-[11px] text-muted">{m.desc}</span>
-            </button>
-          ))}
-        </div>
-
-        {tab === 'tournament' && (
-          <>
-            <label className="mt-4 block text-xs text-muted">大会形式</label>
-            <div className="mt-1 grid grid-cols-3 gap-2">
-              {(
-                [
-                  { deckCount: 2, matchType: 'bo1', label: '2デッキ BO1' },
-                  { deckCount: 3, matchType: 'bo1', label: '3デッキ BO1' },
-                  { deckCount: 2, matchType: 'bo3', label: '2デッキ BO3' },
-                ] as const
-              ).map((r) => {
-                const selected = r.deckCount === rule.deckCount && r.matchType === rule.matchType
-                return (
-                  <button
-                    key={r.label}
-                    onClick={() => setRule({ deckCount: r.deckCount, matchType: r.matchType })}
-                    className={`rounded-md border px-2 py-1.5 text-xs transition ${
-                      selected
-                        ? 'border-gold bg-gold/10 text-gold-bright'
-                        : 'border-line text-muted hover:border-muted/60'
-                    }`}
-                  >
-                    {r.label}
-                  </button>
-                )
-              })}
-            </div>
-          </>
-        )}
 
         <div className="mt-5 flex justify-end gap-2">
           <button
@@ -222,20 +163,9 @@ export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
                 onClick={() => onOpen(t.id)}
                 className="w-full rounded-xl border border-line bg-panel p-5 text-left transition hover:-translate-y-0.5 hover:border-gold/60 hover:bg-panel-2"
               >
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="min-w-0 flex-1 truncate font-display text-lg font-semibold" title={t.name}>
-                    {t.name}
-                  </h3>
-                  <span
-                    className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] ${
-                      t.defaultTab === 'ladder'
-                        ? 'border-win/40 text-win'
-                        : 'border-gold/40 text-gold'
-                    }`}
-                  >
-                    {t.defaultTab === 'ladder' ? 'ランクマ' : '大会'}
-                  </span>
-                </div>
+                <h3 className="min-w-0 truncate font-display text-lg font-semibold" title={t.name}>
+                  {t.name}
+                </h3>
                 <p className="mt-3 text-xs text-muted">
                   自分 {t.myDeckIds.length} ・ 環境 {t.fieldDeckIds.length} ・ 入力{' '}
                   {Object.keys(t.cells).length} セル

@@ -20,8 +20,8 @@ export interface DeckRoles {
 
 interface CreateTableInput {
   name: string
-  defaultTab: TabKind
-  tournamentRule: TournamentRule
+  defaultTab?: TabKind
+  tournamentRule?: TournamentRule
 }
 
 type TableMetaPatch = Partial<
@@ -102,8 +102,8 @@ export const useStore = create<AppStore>()(
             shares: {},
             records: {},
             recordBlend: { ...DEFAULT_RECORD_BLEND },
-            defaultTab: input.defaultTab,
-            tournamentRule: input.tournamentRule,
+            defaultTab: input.defaultTab ?? 'ladder',
+            tournamentRule: input.tournamentRule ?? { deckCount: 2, matchType: 'bo1' },
             inputScale: 'percent',
             powerAdjust: { ...DEFAULT_POWER_ADJUST },
             updatedAt: new Date().toISOString(),
