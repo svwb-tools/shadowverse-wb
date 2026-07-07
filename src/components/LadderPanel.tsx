@@ -47,12 +47,12 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
   })
 
   return (
-    <div className="space-y-5">
-      <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
+    <div className="space-y-6">
+      <div className="grid gap-8 lg:grid-cols-[300px_1fr]">
         {/* 環境シェア入力 */}
         <div>
-          <div className="mb-2 flex items-baseline justify-between">
-            <h3 className="text-sm font-semibold">環境シェア</h3>
+          <div className="mb-3 flex items-baseline justify-between">
+            <h3 className="text-sm font-semibold tracking-wide">環境シェア</h3>
             {hasShares && (
               <button
                 onClick={() => resetShares(table.id)}
@@ -65,7 +65,7 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
           {table.fieldDeckIds.length === 0 ? (
             <p className="text-xs text-muted">「環境にいる」デッキがありません。</p>
           ) : (
-            <ul className="space-y-2">
+            <ul className="space-y-2.5">
               {table.decks
                 .filter((d) => table.fieldDeckIds.includes(d.id))
                 .map((deck) => (
@@ -89,7 +89,7 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
                 ))}
             </ul>
           )}
-          <p className="mt-2.5 text-[11px] leading-relaxed text-muted">
+          <p className="mt-3 text-[11px] leading-relaxed text-muted">
             {hasShares
               ? 'スライダーの比率で重み付けします（右の%は正規化後の想定遭遇率）。'
               : '未入力のため全デッキ均等扱い。1つでも動かすと入力値の比率で重み付けされます。'}
@@ -98,8 +98,8 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
 
         {/* ランキング */}
         <div>
-          <h3 className="mb-2 text-sm font-semibold">期待勝率ランキング</h3>
-          <ol className="space-y-1.5">
+          <h3 className="mb-3 text-sm font-semibold tracking-wide">期待勝率ランキング</h3>
+          <ol className="space-y-2">
             {ranking.map((row, i) => {
               const deck = deckOf.get(row.deckId)
               if (!deck) return null
@@ -109,7 +109,7 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
               return (
                 <li
                   key={row.deckId}
-                  className="flex items-center gap-3 rounded-lg border border-line bg-panel-2 px-3 py-2"
+                  className="flex items-center gap-3 rounded-lg border border-line bg-panel-2 px-3.5 py-2.5"
                 >
                   <span
                     className={`w-7 text-center font-display text-lg font-bold ${
@@ -141,7 +141,7 @@ export function LadderPanel({ table }: { table: MatchupTable }) {
               )
             })}
           </ol>
-          <p className="mt-2.5 px-1 text-[11px] leading-relaxed text-muted">
+          <p className="mt-3 px-1 text-[11px] leading-relaxed text-muted">
             ※ シェア{hasShares ? '重み付け' : '均等'}・デッキパワー補正
             {table.powerAdjust.enabled ? `ON（係数${table.powerAdjust.coef}）` : 'OFF'}
             。未入力セルは除外し、重みを再正規化して計算しています。

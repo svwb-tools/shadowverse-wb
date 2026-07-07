@@ -82,7 +82,7 @@ export function Editor({ tableId, onBack }: { tableId: string; onBack: () => voi
   return (
     <div className="pb-16">
       <header className="sticky top-0 z-40 border-b border-line bg-abyss">
-        <div className="mx-auto flex max-w-350 flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5">
+        <div className="mx-auto flex max-w-350 flex-wrap items-center gap-x-3 gap-y-2 px-5 py-2.5">
           <button
             onClick={onBack}
             className="shrink-0 rounded-md border border-line px-2.5 py-1.5 text-xs text-muted transition hover:border-muted hover:text-fg"
@@ -121,16 +121,16 @@ export function Editor({ tableId, onBack }: { tableId: string; onBack: () => voi
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-350 flex-col gap-4 px-4 pt-4 lg:flex-row lg:items-start">
+      <div className="mx-auto flex max-w-350 flex-col gap-6 px-5 pt-6 lg:flex-row lg:items-start">
         <aside className="w-full shrink-0 lg:w-80">
           <DeckManager table={table} />
         </aside>
 
-        <main className="min-w-0 flex-1 space-y-4">
+        <main className="min-w-0 flex-1 space-y-6">
           <MatrixGrid table={table} exportRef={matrixRef} />
 
-          <section className="rounded-xl border border-line bg-panel p-3.5">
-            <nav className="mb-3 flex gap-1 border-b border-line">
+          <section className="rounded-xl border border-line bg-panel p-5">
+            <nav className="mb-4 flex gap-1 border-b border-line">
               {(
                 [
                   { key: 'ladder', label: 'ランクマ用' },

@@ -38,7 +38,7 @@ export function TournamentPanel({ table }: { table: MatchupTable }) {
 
   return (
     <div>
-      <div className="grid gap-2 sm:grid-cols-3">
+      <div className="grid gap-2.5 sm:grid-cols-3">
         {RULES.map((r) => {
           const selected = r.deckCount === rule.deckCount && r.matchType === rule.matchType
           return (
@@ -64,19 +64,19 @@ export function TournamentPanel({ table }: { table: MatchupTable }) {
         })}
       </div>
 
-      <div className="mt-4">
-        <h3 className="mb-2 text-sm font-semibold">最適持ち込みセット</h3>
+      <div className="mt-5">
+        <h3 className="mb-3 text-sm font-semibold tracking-wide">最適持ち込みセット</h3>
         {notReady ? (
           <p className="rounded-lg border border-dashed border-line bg-panel-2 px-4 py-6 text-center text-xs text-muted">
             {notReady}
           </p>
         ) : (
           <>
-            <ol className="space-y-1.5">
+            <ol className="space-y-2">
               {results.slice(0, SHOW_MAX).map((r, i) => (
                 <li
                   key={r.deckIds.join(':')}
-                  className="flex items-center gap-3 rounded-lg border border-line bg-panel-2 px-3 py-2"
+                  className="flex items-center gap-3 rounded-lg border border-line bg-panel-2 px-3.5 py-2.5"
                 >
                   <span
                     className={`w-7 text-center font-display text-lg font-bold ${
@@ -115,7 +115,7 @@ export function TournamentPanel({ table }: { table: MatchupTable }) {
             {results.length > SHOW_MAX && (
               <p className="mt-1.5 px-1 text-[11px] text-muted">他 {results.length - SHOW_MAX} 通り</p>
             )}
-            <p className="mt-2.5 px-1 text-[11px] leading-relaxed text-muted">
+            <p className="mt-3 px-1 text-[11px] leading-relaxed text-muted">
               {rule.matchType === 'bo1'
                 ? '※ 各ラウンド、相手のデッキが分かってから持ち込み内の最適なデッキを出せる想定の楽観値です（実際は同時選択のためやや上振れします）。'
                 : '※ BO3はコンクエスト式（勝利デッキ再使用不可）のマッチ勝率。相手の出し方はランダム・自分は最適選択の簡易モデルで、相手の持ち込みペアは環境シェアの積で重み付けしています。'}

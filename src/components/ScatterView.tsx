@@ -39,9 +39,9 @@ export function ScatterView({ points }: { points: ScatterPoint[] }) {
   const gridLine = { stroke: 'var(--chart-grid)' } as const
 
   return (
-    <div className="rounded-lg border border-line bg-panel-2 p-3">
-      <h3 className="mb-1 px-1 text-sm font-semibold">2軸ビュー（対環境期待勝率 × デッキパワー）</h3>
-      <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-[11px] text-muted">
+    <div className="rounded-lg border border-line bg-panel-2 p-4">
+      <h3 className="mb-1.5 px-1 text-sm font-semibold tracking-wide">2軸ビュー（対環境期待勝率 × デッキパワー）</h3>
+      <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-[11px] text-muted">
         <span>右下に落ちるデッキは「相性は良いがパワー不足」の相性番長候補です。</span>
         <span className="flex items-center gap-1.5">
           <svg width="12" height="12" viewBox="0 0 12 12">

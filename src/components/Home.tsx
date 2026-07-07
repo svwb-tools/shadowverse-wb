@@ -157,7 +157,7 @@ export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
 
   return (
     <div className="mx-auto max-w-5xl px-5 pb-16">
-      <header className="pb-8 pt-14">
+      <header className="pb-10 pt-14">
         <div className="flex items-start justify-between gap-3">
           <p className="flex items-center gap-2 font-display text-[11px] font-semibold tracking-[0.35em] text-gold">
             <span className="inline-block h-2 w-2 rotate-45 bg-gold" />
@@ -202,7 +202,7 @@ export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
         </div>
       ) : (
         <>
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {sorted.map((t) => (
             <li
               key={t.id}
@@ -220,7 +220,7 @@ export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
             >
               <button
                 onClick={() => onOpen(t.id)}
-                className="w-full rounded-xl border border-line bg-panel p-4 text-left transition hover:-translate-y-0.5 hover:border-gold/60 hover:bg-panel-2"
+                className="w-full rounded-xl border border-line bg-panel p-5 text-left transition hover:-translate-y-0.5 hover:border-gold/60 hover:bg-panel-2"
               >
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="min-w-0 flex-1 truncate font-display text-lg font-semibold" title={t.name}>
@@ -236,7 +236,7 @@ export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
                     {t.defaultTab === 'ladder' ? 'ランクマ' : '大会'}
                   </span>
                 </div>
-                <p className="mt-2.5 text-xs text-muted">
+                <p className="mt-3 text-xs text-muted">
                   自分 {t.myDeckIds.length} ・ 環境 {t.fieldDeckIds.length} ・ 入力{' '}
                   {Object.keys(t.cells).length} セル
                 </p>
@@ -249,7 +249,7 @@ export function Home({ onOpen }: { onOpen: (tableId: string) => void }) {
                   }
                 }}
                 title="削除"
-                className="absolute bottom-3 right-3 rounded px-1.5 py-0.5 text-xs text-muted opacity-0 transition hover:text-lose group-hover:opacity-100"
+                className="absolute bottom-3 right-3 rounded px-1.5 py-0.5 text-xs text-muted opacity-60 transition hover:text-lose group-hover:opacity-100"
               >
                 削除
               </button>

@@ -28,7 +28,7 @@ function DeckForm({
 
   return (
     <form
-      className="space-y-2.5"
+      className="space-y-3"
       onSubmit={(e) => {
         e.preventDefault()
         if (!canSubmit) return
@@ -59,7 +59,7 @@ function DeckForm({
       <div>
         <div className="flex flex-wrap items-baseline gap-x-1.5">
           <span className="text-md font-medium">デッキパワー</span>
-          <span className="text-[10px] leading-relaxed text-muted">
+          <span className="text-[11px] leading-relaxed text-muted">
             デッキパワーの主観評価（1〜10）。相性表と2軸ビューで使用します。
           </span>
         </div>
@@ -78,7 +78,7 @@ function DeckForm({
         </div>
       </div>
       {beforeSubmit}
-      <div className="flex gap-2">
+      <div className="flex gap-2 pt-1">
         <button
           type="submit"
           disabled={!canSubmit}
@@ -141,7 +141,7 @@ function DeckRow({ table, deck, drag }: { table: MatchupTable; deck: Deck; drag:
       onDragEnter={drag.onDragEnter}
       onDragOver={(e) => e.preventDefault()}
       onDragEnd={drag.onDragEnd}
-      className={`group cursor-grab rounded-lg border border-line bg-panel-2 px-2.5 py-2 transition hover:border-line/80 hover:bg-panel-2 active:cursor-grabbing ${
+      className={`group cursor-grab rounded-lg border border-line bg-panel-2 px-3 py-2.5 transition hover:border-line/80 hover:bg-panel-2 active:cursor-grabbing ${
         drag.isDragging ? 'opacity-40' : ''
       }`}
     >
@@ -154,7 +154,7 @@ function DeckRow({ table, deck, drag }: { table: MatchupTable; deck: Deck; drag:
         <button
           onClick={() => setEditing(true)}
           title="編集"
-          className="rounded px-1 text-muted opacity-0 transition hover:text-fg group-hover:opacity-100"
+          className="rounded px-1 text-muted opacity-60 transition hover:text-fg group-hover:opacity-100"
         >
           ✎
         </button>
@@ -165,12 +165,12 @@ function DeckRow({ table, deck, drag }: { table: MatchupTable; deck: Deck; drag:
             }
           }}
           title="削除"
-          className="rounded px-1 text-muted opacity-0 transition hover:text-lose group-hover:opacity-100"
+          className="rounded px-1 text-muted opacity-60 transition hover:text-lose group-hover:opacity-100"
         >
           ✕
         </button>
       </div>
-      <div className="mt-1.5 flex gap-4 text-xs text-muted">
+      <div className="mt-2 flex gap-4 text-xs text-muted">
         <label className="flex cursor-pointer items-center gap-1.5">
           <input
             type="checkbox"
@@ -206,8 +206,8 @@ export function DeckManager({ table }: { table: MatchupTable }) {
   }
 
   return (
-    <div className="rounded-xl border border-line bg-panel p-3.5">
-      <div className="mb-3 flex items-baseline justify-between">
+    <div className="rounded-xl border border-line bg-panel p-5">
+      <div className="mb-4 flex items-baseline justify-between">
         <h2 className="font-display text-base font-semibold tracking-wide">デッキ管理</h2>
         <span className="text-xs text-muted">
           自分 {table.myDeckIds.length} ・ 環境 {table.fieldDeckIds.length}
@@ -242,7 +242,7 @@ export function DeckManager({ table }: { table: MatchupTable }) {
 
       {table.decks.length > 0 && (
         <>
-          <ul className="mt-3.5 max-h-[52vh] space-y-1.5 overflow-y-auto border-t border-line pt-3">
+          <ul className="mt-4 max-h-[52vh] space-y-2 overflow-y-auto border-t border-line pt-4">
             {table.decks.map((deck) => (
               <DeckRow
                 key={deck.id}
@@ -257,7 +257,7 @@ export function DeckManager({ table }: { table: MatchupTable }) {
               />
             ))}
           </ul>
-          <p className="mt-2 text-[11px] text-muted/80">
+          <p className="mt-2.5 text-[11px] text-muted/80">
             ドラッグで並べ替え（マトリクスの行・列にも反映されます）
           </p>
         </>

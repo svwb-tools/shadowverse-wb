@@ -121,7 +121,7 @@ export function MatrixGrid({
 
   return (
     <div>
-      <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 px-1 text-xs text-muted">
+      <div className="mb-3 flex flex-wrap items-center gap-x-5 gap-y-2 px-1 text-xs text-muted">
         <div className="flex shrink-0 overflow-hidden rounded-md border border-line">
           {(
             [
@@ -182,7 +182,7 @@ export function MatrixGrid({
         )}
       </div>
       {showHelp && (
-        <div className="mb-2.5 rounded-lg border border-gold/30 bg-panel-2 px-3.5 py-3 text-xs leading-relaxed text-muted">
+        <div className="mb-3 rounded-lg border border-gold/30 bg-panel-2 p-4 text-xs leading-relaxed text-muted">
           <p className="font-semibold text-fg">デッキパワー補正とは</p>
           <p className="mt-1">
             相性表の上では有利でも、デッキの地力（パワー）が足りず勝ち切れないことがあります。
@@ -295,7 +295,7 @@ export function MatrixGrid({
           </tbody>
         </table>
       </div>
-      <div className="mt-2.5 flex flex-wrap items-center gap-x-5 gap-y-1.5 px-1 text-[11px] text-muted">
+      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 px-1 text-[11px] text-muted">
         <span className="flex items-center gap-1.5">
           <span className="h-3 w-3 rounded-sm" style={{ backgroundColor: winTone(70) }} />
           有利
